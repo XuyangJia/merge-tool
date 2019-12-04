@@ -23,7 +23,7 @@
 
       <el-table-column
         prop="zone"
-        label="区"
+        label="区服"
         width="60">
       </el-table-column>
       <el-table-column
@@ -102,7 +102,6 @@
         width="120">
       </el-table-column>
     </el-table>
-    <el-button>Click Me</el-button>
   </div>
 </div>
 
