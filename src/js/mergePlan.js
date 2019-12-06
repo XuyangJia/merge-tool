@@ -27,10 +27,6 @@ function calculate (data) {
 }
 
 function getAllPlan (num) {
-  let result = [[0], [1], [2]]
-  for (let i = 3; i < num; ++i) {
-    result = null
-  }
 }
 
 export function mergePlan (data) {
