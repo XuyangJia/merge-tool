@@ -1,9 +1,14 @@
 import * as R from 'ramda'
+import { variance } from './tools'
+import config from './config'
 const [minNum] = [120, 250]
 let originalData
 let zoneNum = 0
 
 function startMerge () {
+  if (originalData.length < zoneNum * 3) {
+    return '区服数量不足'
+  }
   const testData = originalData.slice(0, zoneNum * 3)
 
   // 计算总人数
@@ -11,11 +16,10 @@ function startMerge () {
     return acc + elem.powerfulNum + elem.activeNum
   }, 0, testData)
   if (sum < minNum) {
-    zoneNum++
-    startMerge()
+    return addZone()
   } else { // 人数满足条件
     console.log(`尝试${zoneNum}个区进行合并，当前总人数${sum}`)
-    calculate(testData)
+    return calculate(testData)
   }
 }
 
@@ -24,14 +28,14 @@ function calculate (data) {
   data = sortByPower(data) // 按照尖端战力排序
 
   // 列出所有方案
-  const results = getAllPlan(data.length)
-  R.map(R.compose(variance, R.map(item => R.map(i => data[i], item))), results)
-}
-
-function variance (countrys) {
-  const sortByFirstItem = R.sortBy(R.prop('topPower'))
-  const result = sortByFirstItem(countrys);
-  console.log(result)
+  const plans = getAllPlan(data.length)
+  const variances = R.map(R.compose(variance, R.map(item => R.map(i => data[i], item))), plans)
+  const exist = R.any(R.flip(R.lte)(config.idealS), variances)
+  if (exist) {
+    return [R.sortBy(R.prop('0'), R.zip(variances, plans)), data.slice(0, zoneNum * 3)]
+  } else {
+    return addZone()
+  }
 }
 
 function insert (item, pos, array) {
@@ -39,8 +43,8 @@ function insert (item, pos, array) {
   result[pos].push(item)
   return result
 }
+
 function getAllPlan (num = 0) {
-  console.log(num)
   let result = [[[0], [1], [2]]]
   if (num <= 3) return result
   for (let i = 3; i < num; ++i) {
@@ -50,8 +54,13 @@ function getAllPlan (num = 0) {
   return result
 }
 
+function addZone () {
+  zoneNum++
+  return startMerge()
+}
+
 export function mergePlan (data) {
   originalData = data
   zoneNum = 2
-  startMerge()
+  return startMerge()
 }

@@ -1,7 +1,11 @@
 <template>
 <div>
   <div class="input" v-if="tableData === null">
-    <img alt="Vue logo" src="../assets/logo.png">
+    <!-- <el-form :inline="true" class="demo-form-inline">
+        <el-select v-model="serverIndex"  placeholder="请选择服务器">
+          <el-option v-for="(item, index) in servers" :key="index" :label="item" :value="index"></el-option>
+        </el-select>
+    </el-form> -->
     <h1>请输入待合区的起始ID和结束ID</h1>
     <el-form :inline="true" class="demo-form-inline">
       <el-form-item label="起始ID">
@@ -16,6 +20,17 @@
     </el-form>
   </div>
   <div v-if="tableData">
+    <el-form :inline="true" class="demo-form-inline">
+      <el-form-item label="合服方案">
+        <el-select v-model="planIndex" placeholder="切换方案">
+          <el-option v-for="(item, index) in plans" :key="index" :label="'方案'+(index+1)+' 方差：'+item[0]" :value="index"></el-option>
+        </el-select>
+      </el-form-item>
+      <!-- <el-form-item>
+        <el-button type="primary" @click="onChoose">切换方案</el-button>
+        <el-button type="success" @click="onChoose">导出</el-button>
+      </el-form-item> -->
+    </el-form>
     <el-table
       :data="tableData"
       border
@@ -34,6 +49,20 @@
       <el-table-column
         prop="country"
         label="国家">
+        <template slot-scope="scope">
+        <el-tag
+          :type="['primary', 'success', 'danger'][scope.row.country]"
+          disable-transitions>{{['魏','蜀','吴'][scope.row.country]}}</el-tag>
+      </template>
+      </el-table-column>
+      <el-table-column
+        prop="target"
+        label="目标国家">
+        <template slot-scope="scope">
+        <el-tag
+          :type="['primary', 'success', 'danger'][scope.row.target]"
+          disable-transitions>{{['魏','蜀','吴'][scope.row.target]}}</el-tag>
+      </template>
       </el-table-column>
       <el-table-column
         prop="capitalNum"
@@ -94,34 +123,52 @@
 </template>
 
 <script>
-import { mergePlan } from '../js/mergePlan'
 export default {
   name: 'MergeTool',
   data: function () {
     return {
-      startId: '1',
-      endId: '3',
-      dataKeys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'powerTop20', 'topPower1'],
-      tableData: null
+      serverIndex: '',
+      servers: [1, 2, 3],
+      variance: 0,
+      tableData: null,
+      countryData: null,
+      planIndex: -1,
+      plans: null
+    }
+  },
+  watch: {
+    planIndex: {
+      immediate: true,
+      handler (val) {
+        val >= 0 && this.initPlanData(val)
+      }
     }
   },
   methods: {
-    onSubmit: function (event) {
-      const reg = /(h\d+_)?(\d+)$/
-      const prefix = this.startId.match(reg)[1] || ''
-      const start = parseInt(this.startId.match(reg)[2])
-      const end = parseInt(this.endId.match(reg)[2])
-      const zones = Array.from({ length: end - start + 1 }, (_, i) => `${prefix}${start + i}`)
-      this.axios.post('/api/get_zone_country_data/', JSON.stringify({ zones })).then((response) => {
-        this.tableData = response.data.map(item => {
-          const result = {}
-          this.dataKeys.forEach((key, i) => {
-            result[key] = item[i]
-          })
-          return result
+    onChoose: function (event) {
+      this.initPlanData(this.planIndex)
+    },
+    onExport: function (event) {
+      console.log('导出数据')
+    },
+    initPlanData: function (index) {
+      const planData = this.plans[index]
+      this.variance = planData[0]
+      const temp = []
+      planData[1].forEach((arr, i) => {
+        arr.forEach(ranking => {
+          const obj = Object.assign({}, this.countryData[ranking])
+          obj.target = i
+          temp.push(obj)
         })
-        mergePlan(this.tableData)
-      }).catch(console.log)
+      })
+      this.tableData = temp.sort((a, b) => {
+        if (a.zone !== b.zone) {
+          return a.zone - b.zone
+        } else {
+          return a.country - b.country
+        }
+      })
     }
   }
 }

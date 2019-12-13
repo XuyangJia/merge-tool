@@ -1,16 +1,19 @@
 <template>
   <div id="app">
-    <MergeTool/>
+    <Header/>
+    <Main/>
   </div>
 </template>
 
 <script>
-import MergeTool from './components/MergeTool.vue'
+import Header from './components/Header.vue'
+import Main from './components/Main.vue'
 
 export default {
   name: 'app',
   components: {
-    MergeTool
+    Header,
+    Main
   }
 }
 </script>
@@ -22,6 +25,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>

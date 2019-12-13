@@ -15,7 +15,7 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        target: 'http://sg3.ptkill.com/',
+        target: 'http://qh.ptkill.com/',
         changeOrigin: true,
         pathRewrite: {
           '^/api': '/'
