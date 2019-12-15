@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="input" v-if="true">
+    <div class="input" v-if="notRequest">
       <!-- <el-form :inline="true" class="demo-form-inline">
           <el-select v-model="serverIndex"  placeholder="请选择服务器">
             <el-option v-for="(item, index) in servers" :key="index" :label="item" :value="index"></el-option>
@@ -19,21 +19,20 @@
         </el-form-item>
       </el-form>
     </div>
+    <h3 v-if="!notRequest">正在向服务器请求数据...</h3>
   </div>
 </template>
 
 <script>
-// import MergeTool from './MergeTool.vue'
-import { mergePlan } from '../js/mergePlan'
 export default {
   components: {
   },
   data: function () {
     return {
-      startId: '1',
-      endId: '3',
       dataKeys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'powerTop20', 'topPower1'],
-      variance: 500
+      notRequest: true,
+      startId: '1',
+      endId: '3'
     }
   },
   methods: {
@@ -43,6 +42,7 @@ export default {
       const start = parseInt(this.startId.match(reg)[2])
       const end = parseInt(this.endId.match(reg)[2])
       const zones = Array.from({ length: end - start + 1 }, (_, i) => `${prefix}${start + i}`)
+      this.notRequest = false
       this.axios.post('/api/get_zone_country_data/', JSON.stringify({ zones })).then((response) => {
         const origindata = response.data.map(item => {
           const result = {}
@@ -51,15 +51,9 @@ export default {
           })
           return result
         })
-        const planData = mergePlan(origindata)
-        console.log(planData)
-        // this.plans = planData[0]
-        // this.countryData = planData[1]
-        // this.planIndex = 0
+        this.$store.dispatch('zones/getCountryData', origindata)
+        this.$router.push('merge')
       }).catch(console.error)
-    },
-    refresh: function () {
-      console.log('重新计算')
     }
   }
 }
