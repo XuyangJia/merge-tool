@@ -18,14 +18,19 @@ function variance (countrys) {
   // 4. 30日内充值
 
   // 5. 玩家数
-  const playNums = getPlayNums(countrys)
+  const playerNums = getActivePlayerNums(countrys)
 
   // 6. 活跃coin
   const activeCoins = getActiveCoins(countrys)
 
-  const potentials = getPotentials(topPowers, activePowers, payMoneys, playNums, activeCoins)
+  const totalNum = Math.floor(R.sum(playerNums) * 0.1) * 10
+  const numRight = R.find(x => {
+    return totalNum === x[0]
+  })(config.numRight)
+
+  const potentials = getPotentials(topPowers, activePowers, payMoneys, playerNums, activeCoins)
   const potentialAverage = average(potentials)
-  return R.compose(Math.round, R.sum, R.map(num => Math.pow(num - potentialAverage, 2)))(potentials)
+  return R.compose(Math.round, R.sum, R.map(num => Math.pow(num - potentialAverage, 2)))(potentials) / numRight[1]
 }
 
 /**
@@ -66,7 +71,7 @@ function getPayMoneys (countrys) {
 /**
  * 计算国家潜力值 玩家数
  */
-function getPlayNums (countrys) {
+function getActivePlayerNums (countrys) {
   const playNums = R.map(R.compose(R.sum, R.map(R.compose(R.sum, R.props(['powerfulNum', 'activeNum'])))), countrys)
   return R.map(x => x * config.Right4 / average(playNums), playNums)
 }

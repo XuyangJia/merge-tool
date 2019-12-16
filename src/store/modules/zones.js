@@ -1,20 +1,22 @@
-import { getMergePlans } from '../../js/merge'
+import { getMergePlans } from '../../js/mergeUtil'
 
 // initial state
 const state = {
   countries: [],
-  plans: []
+  items: []
 }
 
 // getters
-const getters = {}
+const getters = {
+  plans: state => state.items
+}
 
 // mutations
 const mutations = {
   setCountries (state, countries) {
     state.countries = countries
-    const plans = getMergePlans(countries.slice(0, 9), true)
-    console.log(plans)
+    const plans = getMergePlans(countries)
+    state.items = plans
   }
 }
 
