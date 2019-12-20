@@ -19,6 +19,7 @@
 
 <script>
 import config from '../js/config'
+import { saveAs } from 'file-saver'
 export default {
   data: function () {
     return {
@@ -34,6 +35,8 @@ export default {
     },
     exportPlans: function () {
       console.log('导出合服方案')
+      const blob = new Blob([JSON.stringify(config)], { type: 'text/plain;charset=utf-8' })
+      saveAs(blob, 'plans.json')
     }
   }
 }
