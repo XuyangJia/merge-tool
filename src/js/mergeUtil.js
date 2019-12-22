@@ -40,7 +40,8 @@ function calculate (data) {
   if (exist) {
     return success([R.sortBy(R.prop('0'), R.zip(variances, plans)), data])
   } else {
-    return filed(STATUS_NOT_EXIST, '方差不满足')
+    console.log(variances)
+    return filed(STATUS_NOT_EXIST, `所有组合的方差都大于${config.idealS}`)
   }
 }
 
