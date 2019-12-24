@@ -4,11 +4,16 @@
     <el-divider></el-divider>
     <el-form  v-if="plans" :inline="true" class="demo-form-inline">
       <el-form-item label="合服方案">
+        <el-input v-if="varianceDIY" :placeholder="`自定义方案 方差：${varianceDIY}`" :disabled="true"></el-input>
         <el-select v-model="planIndex">
-          <el-option v-for="(item, index) in plans" :key="index" :label="'方案'+(index+1)+' 方差：'+item[0]" :value="index"></el-option>
+          <el-option v-for="(item, index) in plans" :key="index" :label="`方案${index + 1} 方差：${plans[index][0]}`" :value="index"></el-option>
         </el-select>
-        改变区数量：<el-input-number v-model="zoneNum" @change="handleChange" :min="2" :max="8"></el-input-number>
       </el-form-item>
+      <el-form-item label="区数量：">
+        <el-input-number v-model="zoneNum" @change="handleChange" :min="2" :max="6"></el-input-number>
+        <el-button type="warning">计算方案</el-button>
+      </el-form-item>
+      <el-button type="primary" @click="refresh">重算方差</el-button>
     </el-form>
     <el-table
       v-if="tableData"
@@ -71,6 +76,10 @@
         label="总战力">
       </el-table-column>
       <el-table-column
+        prop="activePay30"
+        label="30日充值">
+      </el-table-column>
+      <el-table-column
         prop="activePay"
         label="实际充值">
       </el-table-column>
@@ -131,6 +140,10 @@
         label="总战力">
       </el-table-column>
       <el-table-column
+        prop="activePay30"
+        label="30日充值">
+      </el-table-column>
+      <el-table-column
         prop="activePay"
         label="实际充值">
       </el-table-column>
@@ -143,11 +156,11 @@
         label="Coin">
       </el-table-column>
       <el-table-column
-        prop="activeCoin"
+        prop="extraCoin"
         label="补偿Coin">
       </el-table-column>
       <el-table-column
-        prop="activeCoin"
+        prop="coinSum"
         label="补偿后Coin">
       </el-table-column>
       <el-table-column
@@ -163,6 +176,8 @@
 </template>
 
 <script>
+import * as R from 'ramda'
+import { variance } from '../js/variance'
 export default {
   props: [ 'initialPlan' ],
   data () {
@@ -174,6 +189,8 @@ export default {
       variance: 0,
       tableData: null,
       plans: null,
+      planDIY: null,
+      varianceDIY: null,
       countryData: null,
       options: ['魏国', '蜀国', '吴国'],
       planIndex: -1
@@ -181,7 +198,7 @@ export default {
   },
   created: function () {
     if (this.initialPlan.status === -1) {
-      this.plans = this.initialPlan.data[0]
+      this.plans = this.initialPlan.data[0].slice(0, 50)
       this.countryData = this.initialPlan.data[1]
       this.planIndex = 0
     } else {
@@ -198,6 +215,7 @@ export default {
   },
   methods: {
     initPlanData: function (index) {
+      this.planDIY = this.varianceDIY = null
       const planData = this.plans[index]
       this.variance = planData[0]
       const temp = []
@@ -216,6 +234,15 @@ export default {
         }
       })
     },
+    refresh: function () {
+      const countries0 = this.tableData.filter(item => item.target === 0)
+      const countries1 = this.tableData.filter(item => item.target === 1)
+      const countries2 = this.tableData.filter(item => item.target === 2)
+      const countries = [countries0, countries1, countries2]
+      this.planDIY = countries.map(arr => arr.map(obj => this.tableData.indexOf(obj)))
+
+      this.varianceDIY = variance(countries)
+    },
     handleChange (value) {
       console.log(value)
     }
@@ -231,7 +258,20 @@ export default {
       return arr.map(x => x.zone).join('-') + '区'
     },
     table2Data: function () {
-      return this.tableData.slice(0, 3)
+      const keys = Object.keys(this.tableData[0])
+      const diff = (a, b) => { return a - b }
+      return [0, 1, 2].map(countryId => {
+        const arr = this.tableData.filter(item => item.target === countryId)
+        const result = {}
+        keys.forEach(key => {
+          result[key] = R.compose(R.sum, R.map(R.prop(key)))(arr)
+        })
+        result.country = countryId
+        result.extraCoin = 100
+        result.coinSum = result.activeCoin + result.extraCoin
+        result.topPower1 = R.compose(R.nth(-1), R.sort(diff), R.map(R.prop('topPower1')))(arr)
+        return result
+      })
     }
   }
 }

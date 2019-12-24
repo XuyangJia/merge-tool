@@ -20,6 +20,13 @@ module.exports = {
         pathRewrite: {
           '^/api': '/'
         }
+      },
+      '/foo': {
+        target: 'http://sg3.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '/'
+        }
       }
     }
   }

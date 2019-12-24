@@ -5,7 +5,7 @@ export default {
   Right4: 80,
   Right5: 60,
   Right6: 60,
-  idealS: 1000, // 理想比较方差
+  idealS: 500, // 理想比较方差
   maxNum: 250, // 人数上限
   numRight: [
     [110, 0.6], // 人数下限
@@ -23,6 +23,15 @@ export default {
     [230, 0.55],
     [240, 0.5]
   ],
+  Cright: {
+    Cright1: 100,
+    Cright2: 100,
+    Cright3: 50,
+    Cright4: 100,
+    Cright5: 80,
+    Cright6: 60,
+    ratio: 0.5
+  },
   keys: [
     ['zone', '区服'],
     ['days', '开服天数'],
@@ -34,6 +43,7 @@ export default {
     ['rankScore', '排名积分'],
     ['topPower', '活跃尖端战力'],
     ['activePowerSum', '活跃总战力'],
+    ['activePay30', '30日充值'],
     ['activePay', '活跃实际充值'],
     ['activePayFake', '活跃虚拟充值'],
     ['activeCoin', '活跃Coin'],

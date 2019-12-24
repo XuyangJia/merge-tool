@@ -19,7 +19,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <h3 v-if="!notRequest">正在向服务器请求数据...</h3>
+    <h3 v-if="!notRequest">正在计算合服方案...</h3>
   </div>
 </template>
 
@@ -29,10 +29,10 @@ export default {
   },
   data: function () {
     return {
-      dataKeys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'powerTop20', 'topPower1'],
+      dataKeys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay', 'activePay30', 'activePayFake', 'activeCoin', 'multiplePower', 'powerTop20', 'topPower1'],
       notRequest: true,
-      startId: '1',
-      endId: '3'
+      startId: '8',
+      endId: '10'
     }
   },
   methods: {
