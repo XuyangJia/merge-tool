@@ -34,11 +34,11 @@ function getSingleMergePlan (data) {
   if (zoneNum < 2) {
     return filed(STATUS_ZONE_SHORT, '区数量不足')
   } else if (sum < minNum) {
-    return filed(STATUS_NOT_ENOUGH, '人数不足')
+    return filed(STATUS_NOT_ENOUGH, `人数不足: ${sum} < ${minNum}`)
   } else if (sum > maxNum) {
     return filed(STATUS_TOO_MUCH, '人数过多')
   } else {
-    console.log(`尝试${zoneNum}个区进行合并，当前总人数${sum}`)
+    console.log(`尝试${data[0].zone}区-${data[data.length - 1].zone}区 共计${zoneNum}个区进行合并，当前总人数${sum}`)
     return calculate(data)
   }
 }
