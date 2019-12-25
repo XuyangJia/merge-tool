@@ -2,35 +2,46 @@
   <el-collapse-item>
     <template slot="title"> <h2>{{ title }}</h2> </template>
     <el-divider></el-divider>
-    <el-form  v-if="plans" :inline="true" class="demo-form-inline">
-      <el-form-item label="合服方案">
-        <el-input v-if="varianceDIY" :placeholder="`自定义方案 方差：${varianceDIY}`" :disabled="true"></el-input>
+    <el-row :gutter="20">
+      <el-col :span="8">
         <el-select v-model="planIndex">
           <el-option v-for="(item, index) in plans" :key="index" :label="`方案${index + 1} 方差：${plans[index][0]}`" :value="index"></el-option>
         </el-select>
-      </el-form-item>
-      <el-form-item label="区数量：">
-        <el-input-number v-model="zoneNum" @change="handleChange" :min="2" :max="6"></el-input-number>
-        <el-button type="warning">计算方案</el-button>
-      </el-form-item>
-      <el-button type="primary" @click="refresh">重算方差</el-button>
-    </el-form>
+      </el-col>
+      <el-col :span="8">
+        <div>
+          区数量：
+          <el-input-number v-model="zoneNum" @change="handleChange" :min="2" :max="6"></el-input-number>
+          <el-button type="warning">计算方案</el-button>
+        </div>
+      </el-col>
+      <el-col :span="8">
+        <div>
+          <el-button type="primary" @click="refresh">重算方差</el-button>
+          <el-tag v-if="varianceDIY" type="danger" effect="dark">自定义方差:{{varianceDIY}}</el-tag>
+        </div>
+      </el-col>
+    </el-row>
     <el-table
       v-if="tableData"
       :data="tableData"
+      cell-class-name="my-cell"
       border
       stripe
       style="width: 100%">
       <el-table-column
         prop="zone"
+        width="60"
         label="区服">
       </el-table-column>
       <el-table-column
         prop="days"
+        width="80"
         label="开服天数">
       </el-table-column>
       <el-table-column
         prop="country"
+        width="60"
         label="国家">
         <template slot-scope="scope">
         <el-tag
@@ -49,10 +60,12 @@
       </el-table-column>
       <el-table-column
         prop="capitalNum"
+        width="70"
         label="都城数">
       </el-table-column>
       <el-table-column
         prop="cityNum"
+        width="80"
         label="城池总数">
       </el-table-column>
       <el-table-column
@@ -92,6 +105,10 @@
         label="Coin">
       </el-table-column>
       <el-table-column
+        prop="extraCoin"
+        label="补偿Coin">
+      </el-table-column>
+      <el-table-column
         prop="multiplePower"
         label="综合国力">
       </el-table-column>
@@ -103,19 +120,26 @@
         prop="topPower1"
         label="单将最高战力">
       </el-table-column>
+      <el-table-column
+        prop="right"
+        label="Cright">
+      </el-table-column>
     </el-table>
     <el-table
       v-if="tableData"
       :data="table2Data"
+      cell-class-name="my-cell"
       border
       stripe
       style="width: 100%">
       <el-table-column
         prop="zone"
-        label="合区区服">
+        width="60"
+        label="区服">
       </el-table-column>
       <el-table-column
         prop="country"
+        width="60"
         label="国家">
         <template slot-scope="scope">
         <el-tag
@@ -156,14 +180,6 @@
         label="Coin">
       </el-table-column>
       <el-table-column
-        prop="extraCoin"
-        label="补偿Coin">
-      </el-table-column>
-      <el-table-column
-        prop="coinSum"
-        label="补偿后Coin">
-      </el-table-column>
-      <el-table-column
         prop="multiplePower"
         label="综合国力">
       </el-table-column>
@@ -198,7 +214,8 @@ export default {
   },
   created: function () {
     if (this.initialPlan.status === -1) {
-      this.plans = this.initialPlan.data[0].slice(0, 50)
+      const allPlans = this.initialPlan.data[0]
+      this.plans = allPlans.slice(allPlans.length - 100)
       this.countryData = this.initialPlan.data[1]
       this.planIndex = 0
     } else {
@@ -266,8 +283,8 @@ export default {
         keys.forEach(key => {
           result[key] = R.compose(R.sum, R.map(R.prop(key)))(arr)
         })
+        result.zone = 123
         result.country = countryId
-        result.extraCoin = 100
         result.coinSum = result.activeCoin + result.extraCoin
         result.topPower1 = R.compose(R.nth(-1), R.sort(diff), R.map(R.prop('topPower1')))(arr)
         return result
@@ -276,3 +293,25 @@ export default {
   }
 }
 </script>
+
+<style>
+  .my-cell {
+    padding: 3px 0 !important;
+  }
+  .el-col {
+    border-radius: 4px;
+  }
+  .bg-purple-dark {
+    background: #99a9bf;
+  }
+  .bg-purple {
+    background: #d3dce6;
+  }
+  .bg-purple-light {
+    background: #e5e9f2;
+  }
+  .grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+  }
+</style>

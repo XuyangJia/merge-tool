@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { getCright } from '../js/mergeUtil'
 export default {
   components: {
   },
@@ -31,8 +32,8 @@ export default {
     return {
       dataKeys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay', 'activePay30', 'activePayFake', 'activeCoin', 'multiplePower', 'powerTop20', 'topPower1'],
       notRequest: true,
-      startId: '8',
-      endId: '10'
+      startId: '13',
+      endId: '16'
     }
   },
   methods: {
@@ -49,6 +50,7 @@ export default {
           this.dataKeys.forEach((key, i) => {
             result[key] = item[i]
           })
+          result.right = getCright(result)
           return result
         })
         this.$store.dispatch('zones/getCountryData', origindata)

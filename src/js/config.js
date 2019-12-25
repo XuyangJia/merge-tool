@@ -30,8 +30,12 @@ export default {
     Cright4: 100,
     Cright5: 80,
     Cright6: 60,
-    ratio: 0.5
+    ratio: 1.5 / 3
   },
+  reward: [
+    { coin: 500, item036: 5 },
+    { coin: 200, item036: 10 }
+  ],
   keys: [
     ['zone', '区服'],
     ['days', '开服天数'],

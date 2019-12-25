@@ -15,6 +15,18 @@ const filed = (status, msg) => ({ status, msg })
 const success = data => ({ status: STATUS_OK, data })
 
 let tempVariances = null
+let tempData = null
+let Crights = null
+let criticalCright = 0
+let criticalPowerfulNum = 0
+let criticalActiveNum = 0
+let criticalTopPower = 0
+let criticalActivePowerSum = 0
+let criticalPay = 0
+let minPowerfulNum = 0
+let minActiveNum = 0
+let minActivePowerSum = 0
+let minPay = 0
 
 function getSingleMergePlan (data) {
   const zoneNum = data.length / 3
@@ -50,18 +62,26 @@ function allocateTop3 (top3) {
 
 function calculate (data) {
   const sortByPower = R.sortBy(R.prop('topPower'))
+  tempData = data
   const temp = sortByPower(data.concat()) // 按照尖端战力排序后取前三
   const top3 = R.take(3)(temp)
   const base = allocateTop3(top3).map(i => data.indexOf(temp[i]))
 
-  const Crights = R.map(x => {
-    return Cright1 * x.topPower + Cright2 * x.activePowerSum + Cright3 * (x.activePay + x.activePayFake) + Cright4 * x.activePay30 + Cright5 * x.powerfulNum + Cright6 * x.activeNum
-  })(data)
-  const criticalCright = Math.floor(R.sum(Crights) * ratio)
-  console.log(Crights, criticalCright)
+  Crights = R.map(getCright)(data)
+  criticalCright = Math.floor(R.sum(Crights) * ratio)
+  criticalPowerfulNum = Math.floor(R.compose(R.sum, R.map(x => x.powerfulNum))(tempData) * ratio)
+  criticalActiveNum = Math.floor(R.compose(R.sum, R.map(x => x.activeNum))(tempData) * ratio)
+  criticalTopPower = Math.floor(R.compose(R.sum, R.map(x => x.topPower))(tempData) * ratio)
+  criticalActivePowerSum = Math.floor(R.compose(R.sum, R.map(x => x.activePowerSum))(tempData) * ratio)
+  criticalPay = Math.floor(R.compose(R.sum, R.map(x => (x.activePay + x.activePayFake)))(tempData) * ratio)
+  minPowerfulNum = Math.floor(R.compose(R.sum, R.map(x => x.powerfulNum))(tempData) / 6)
+  minActiveNum = Math.floor(R.compose(R.sum, R.map(x => x.activeNum))(tempData) / 5)
+  minActivePowerSum = Math.floor(R.compose(R.sum, R.map(x => x.activePowerSum))(tempData) / 4)
+  minPay = Math.floor(R.compose(R.sum, R.map(x => (x.activePay + x.activePayFake)))(tempData) / 5)
 
   // 列出所有方案
   const plans = getAllPlans(base, temp.length)
+  console.log(`方案数量：${plans.length}`)
 
   const variances = R.map(R.compose(variance, R.map(item => R.map(i => data[i], item))), plans)
   const exist = R.any(R.flip(R.lte)(config.idealS), variances)
@@ -82,24 +102,6 @@ function countPlayers (arr) {
   return R.reduce((acc, elem) => {
     return acc + elem.powerfulNum + elem.activeNum
   }, 0, arr)
-}
-
-function getAllPlans (arr, num = 0) {
-  function insert (item, pos, array) {
-    const result = R.clone(array)
-    result[pos].push(item)
-    return result
-  }
-
-  let result = [R.map(x => [x])(arr)]
-  if (num <= 3) return result
-  Array(num).fill('').forEach((item, i) => {
-    if (!arr.includes(i)) {
-      const curriedInsert = R.curry(insert)(i)
-      result = R.ap([curriedInsert(0), curriedInsert(1), curriedInsert(2)])(result)
-    }
-  })
-  return result
 }
 
 function chooseBest () {
@@ -134,6 +136,47 @@ function getAllMergePlan (countries, plans) {
     }
   }
   return plans
+}
+
+function getAllPlans (arr, num) {
+  function insert (item, pos, array) {
+    const result = R.clone(array)
+    result[pos].push(item)
+    return result
+  }
+
+  let result = [R.map(x => [x])(arr)]
+  if (num <= 3) return result
+  Array(num).fill('').forEach((item, i) => {
+    if (!arr.includes(i)) {
+      const curriedInsert = R.curry(insert)(i)
+      result = R.ap([curriedInsert(0), curriedInsert(1), curriedInsert(2)])(result)
+      result = result.filter(arr => {
+        return !arr.some(noFeasibility)
+      })
+    }
+  })
+  return R.filter(R.all(workable))(result)
+}
+
+function noFeasibility (arr) {
+  return (R.compose(R.sum, R.map(i => Crights[i]))(arr) > criticalCright ||
+  R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) > criticalPowerfulNum ||
+  R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) > criticalActiveNum ||
+  R.compose(R.sum, R.map(i => tempData[i].topPower))(arr) > criticalTopPower ||
+  R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) > criticalActivePowerSum ||
+  R.compose(R.sum, R.map(i => (tempData[i].activePay + tempData[i].activePayFake)))(arr) > criticalPay)
+}
+
+function workable (arr) {
+  return (R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) > minPowerfulNum &&
+  R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) > minActiveNum &&
+  R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) > minActivePowerSum &&
+  R.compose(R.sum, R.map(i => (tempData[i].activePay + tempData[i].activePayFake)))(arr) > minPay)
+}
+
+export function getCright (x) {
+  return Cright1 * x.topPower + Cright2 * x.activePowerSum + Cright3 * (x.activePay + x.activePayFake) + Cright4 * x.activePay30 + Cright5 * x.powerfulNum + Cright6 * x.activeNum
 }
 
 export function getMergePlans (countries, single) {
