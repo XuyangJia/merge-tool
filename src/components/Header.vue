@@ -15,22 +15,55 @@
 </template>
 
 <script>
+// import * as R from 'ramda'
+import { mapGetters } from 'vuex'
 import config from '../js/config'
-import { saveAs } from 'file-saver'
+// import { saveAs } from 'file-saver'
 export default {
   data: function () {
     return {
       variance: config.idealS
     }
   },
+  computed: {
+    ...mapGetters('zones', {
+      countries: 'countries',
+      bestPlans: 'bestPlans'
+    })
+  },
   methods: {
     backToHome: function () {
       this.$router.push('/')
     },
     exportPlans: function () {
-      console.log('导出合服方案')
-      const blob = new Blob([JSON.stringify({ msg: '功能未实现' })], { type: 'text/plain;charset=utf-8' })
-      saveAs(blob, 'plans.json')
+      // // 二维数组转换为一维数组
+      // const isNumber = x => {
+      //   return !isNaN(x)
+      // }
+      // const mapIndexed = R.addIndex(R.map)
+      // const getZone = index => `h1_${100 + index}`
+      // let cursor = 0 // 计算进度
+      // const plans = mapIndexed((arr, index) => {
+      //   const result = {}
+      //   const toZone = getZone(index)
+      //   const plan = []
+      //   mapIndexed((arr2, country) => {
+      //     R.compose(R.map(i => (plan[i] = country)), R.filter(isNumber))(arr2)
+      //   })(arr)
+      //   let countryArr = this.countries.slice(cursor, cursor + plan.length)
+      //   mapIndexed((country, i) => {
+      //     const data = countryArr[i]
+      //     const reward = R.pick(Object.keys((data.reward)))(data.reward)
+      //     const zone = data.zone
+      //     result[zone] || (result[zone] = { to_zone: toZone, reward, country: [] })
+      //     result[zone].country[data.country] = country
+      //   })(plan)
+      //   cursor += plan.length // 移动游标
+      //   return result
+      // })(this.bestPlans)
+      // const masterPlan = R.reduce(R.merge, {})(plans)
+      // const blob = new Blob([JSON.stringify(masterPlan)], { type: 'text/plain;charset=utf-8' })
+      // saveAs(blob, 'plans.json')
     }
   }
 }

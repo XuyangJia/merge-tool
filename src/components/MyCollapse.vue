@@ -9,11 +9,10 @@
         </el-select>
       </el-col>
       <el-col :span="8">
-        <div>
-          区数量：
-          <el-input-number v-model="zoneNum" @change="handleChange" :min="2" :max="6"></el-input-number>
-          <el-button type="warning">计算方案</el-button>
-        </div>
+        <!-- <el-input placeholder="请输入内容" v-model="zoneNum">
+          <template slot="prepend">自定义区数量：</template>
+          <el-button type="warning" slot="append" icon="el-icon-s-promotion" @click="handleChange"></el-button>
+        </el-input> -->
       </el-col>
       <el-col :span="8">
         <div>
@@ -25,7 +24,9 @@
     <el-table
       v-if="tableData"
       :data="tableData"
+      header-cell-class-name="my-header"
       cell-class-name="my-cell"
+      size="small"
       border
       stripe
       style="width: 100%">
@@ -41,19 +42,17 @@
       </el-table-column>
       <el-table-column
         prop="country"
-        width="60"
+        width="50"
         label="国家">
         <template slot-scope="scope">
-        <el-tag
-          :type="['primary', 'success', 'danger'][scope.row.country]"
-          disable-transitions>{{['魏','蜀','吴'][scope.row.country]}}</el-tag>
+        <el-button :type="['primary', 'success', 'danger'][scope.row.country]" circle size="mini">{{['魏','蜀','吴'][scope.row.country]}}</el-button>
       </template>
       </el-table-column>
       <el-table-column
         prop="target"
         label="目标国家">
         <template slot-scope="scope">
-        <el-select v-model="scope.row.target">
+        <el-select v-model="scope.row.target" size="mini">
           <el-option v-for="(item, index) in options" :key="index" :label="item" :value="index"></el-option>
         </el-select>
       </template>
@@ -82,6 +81,7 @@
       </el-table-column>
       <el-table-column
         prop="topPower"
+        sortable
         label="尖端战力">
       </el-table-column>
       <el-table-column
@@ -107,6 +107,9 @@
       <el-table-column
         prop="extraCoin"
         label="补偿Coin">
+        <template slot-scope="scope">
+          <span>{{ scope.row.reward.coin }}</span>
+        </template>
       </el-table-column>
       <el-table-column
         prop="multiplePower"
@@ -128,6 +131,7 @@
     <el-table
       v-if="tableData"
       :data="table2Data"
+      header-cell-class-name="my-header"
       cell-class-name="my-cell"
       border
       stripe
@@ -139,12 +143,10 @@
       </el-table-column>
       <el-table-column
         prop="country"
-        width="60"
+        width="50"
         label="国家">
         <template slot-scope="scope">
-        <el-tag
-          :type="['primary', 'success', 'danger'][scope.row.country]"
-          disable-transitions>{{['魏','蜀','吴'][scope.row.country]}}</el-tag>
+        <el-button :type="['primary', 'success', 'danger'][scope.row.country]" circle size="mini">{{['魏','蜀','吴'][scope.row.country]}}</el-button>
       </template>
       </el-table-column>
       <el-table-column
@@ -215,7 +217,7 @@ export default {
   created: function () {
     if (this.initialPlan.status === -1) {
       const allPlans = this.initialPlan.data[0]
-      this.plans = allPlans.slice(allPlans.length - 100)
+      this.plans = allPlans
       this.countryData = this.initialPlan.data[1]
       this.planIndex = 0
     } else {
@@ -260,8 +262,8 @@ export default {
 
       this.varianceDIY = variance(countries)
     },
-    handleChange (value) {
-      console.log(value)
+    handleChange () {
+      console.log(this.zoneNum)
     }
   },
   computed: {
@@ -295,23 +297,16 @@ export default {
 </script>
 
 <style>
+  .my-header {
+    padding: 5px 0 !important;
+    color: #303133;
+    text-align: center !important;
+  }
   .my-cell {
-    padding: 3px 0 !important;
+    padding: 1px 0 !important;
+    text-align: center !important;
   }
   .el-col {
     border-radius: 4px;
-  }
-  .bg-purple-dark {
-    background: #99a9bf;
-  }
-  .bg-purple {
-    background: #d3dce6;
-  }
-  .bg-purple-light {
-    background: #e5e9f2;
-  }
-  .grid-content {
-    border-radius: 4px;
-    min-height: 36px;
   }
 </style>

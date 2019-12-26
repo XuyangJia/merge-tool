@@ -30,8 +30,11 @@ function variance (countries) {
   })(config.numRight)
   numRight = numRight || config.numRight[config.numRight.length - 1]
 
-  const potentials = getPotentials(topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins)
+  // const potentials = getPotentials(topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins)
+  const potentials = getPotentials(topPowers, activePowers, payMoneys, playerNums, activeCoins)
   const potentialAverage = average(potentials)
+  console.log({ topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins })
+  console.log(`平均潜力值：${potentialAverage}`)
   return Math.round(R.compose(R.sum, R.map(num => Math.pow(num - potentialAverage, 2)))(potentials) / numRight[1])
 }
 
@@ -51,6 +54,7 @@ function getTopPowers (countries) {
     return 0
   }))
   const topPowers = R.map(R.sum, topPowerArr)
+  console.log('尖端战力', topPowers)
   return R.map(x => x / average(topPowers), topPowers)
 }
 
@@ -59,6 +63,7 @@ function getTopPowers (countries) {
  */
 function getActivePowers (countries) {
   const activePowers = R.map(R.compose(R.sum, R.map(R.prop('activePowerSum'))), countries)
+  console.log('活跃总战力', activePowers)
   return R.map(x => x * config.Right2 / average(activePowers), activePowers)
 }
 
@@ -67,6 +72,7 @@ function getActivePowers (countries) {
  */
 function getPayMoneys (countries) {
   const payMoneys = R.map(R.compose(R.sum, R.map(R.compose(R.sum, R.props(['activePay', 'activePayFake'])))), countries)
+  console.log('充值', payMoneys)
   return R.map(x => x * config.Right3 / average(payMoneys), payMoneys)
 }
 
@@ -83,6 +89,7 @@ function getPayMoneys30 (countries) {
  */
 function getActivePlayerNums (countries) {
   const playNums = R.map(R.compose(R.sum, R.map(R.compose(R.sum, R.props(['powerfulNum', 'activeNum'])))), countries)
+  console.log('玩家数', playNums)
   return R.map(x => x * config.Right5 / average(playNums), playNums)
 }
 
@@ -91,6 +98,7 @@ function getActivePlayerNums (countries) {
  */
 function getActiveCoins (countries) {
   const activeCoins = R.map(R.compose(R.sum, R.map(R.prop('activeCoin'))), countries)
+  console.log('活跃coin', activeCoins)
   return R.map(x => x * config.Right6 / average(activeCoins), activeCoins)
 }
 

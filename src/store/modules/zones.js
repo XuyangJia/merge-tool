@@ -7,31 +7,36 @@ import { getMergePlans } from '../../js/mergeUtil'
 const state = {
   countries: [],
   items: [],
-  logs: []
+  bestPlans: [],
+  logs: null
 }
 
 // getters
 const getters = {
+  countries: state => state.countries,
   plans: state => state.items,
+  bestPlans: state => state.bestPlans,
   logs: state => state.logs
 }
 
 // mutations
 const mutations = {
   setCountries (state, countries) {
-    this.addLog('拿到国家数据，开始计算合服方案')
+    // state.logs = ['拿到国家数据，开始计算合服方案']
     const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countries)
-    state.countries = R.map(obj => {
+    state.countries = Object.freeze(R.map(obj => {
       const rewards = R.map(x => {
         const equalizeDay = maxDay + (1000 / x.coin)
         return R.map(y => y * (equalizeDay - obj.days))(x)
       })(config.reward)
-      obj.extraCoin = R.prop('coin', R.mergeWith(R.add, ...rewards))
-    })(countries)
+      obj.reward = R.mergeWith(R.add, ...rewards)
+      return obj
+    })(countries))
     console.time('计算所有方案及其方差')
     const plans = getMergePlans(countries)
     console.timeEnd('计算所有方案及其方差')
     state.items = plans
+    // state.bestPlans = R.compose(R.map(item => item.data[0][0][1]), R.filter(item => item.data))(plans)
   },
   addLog (state, log) {
     state.logs.push(log)

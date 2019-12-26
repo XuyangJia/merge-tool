@@ -1,6 +1,7 @@
 import * as R from 'ramda'
 import { variance } from './variance'
 import config from './config'
+// import store from '../store'
 const { Cright1, Cright2, Cright3, Cright4, Cright5, Cright6, ratio } = config.Cright
 const minNum = config.numRight[0][0]
 const maxNum = config.maxNum
@@ -28,6 +29,11 @@ let minActiveNum = 0
 let minActivePowerSum = 0
 let minPay = 0
 
+function sendMsg (msg) {
+  console.log(msg)
+  // store.dispatch('zones/addLog', msg)
+}
+
 function getSingleMergePlan (data) {
   const zoneNum = data.length / 3
   const sum = countPlayers(data)
@@ -38,7 +44,7 @@ function getSingleMergePlan (data) {
   } else if (sum > maxNum) {
     return filed(STATUS_TOO_MUCH, '人数过多')
   } else {
-    console.log(`尝试${data[0].zone}区-${data[data.length - 1].zone}区 共计${zoneNum}个区进行合并，当前总人数${sum}`)
+    sendMsg(`尝试${data[0].zone}区-${data[data.length - 1].zone}区 共计${zoneNum}个区进行合并，当前总人数${sum}`)
     return calculate(data)
   }
 }
@@ -81,7 +87,7 @@ function calculate (data) {
 
   // 列出所有方案
   const plans = getAllPlans(base, temp.length)
-  console.log(`方案数量：${plans.length}`)
+  sendMsg(`方案数量：${plans.length}`)
 
   const variances = R.map(R.compose(variance, R.map(item => R.map(i => data[i], item))), plans)
   const exist = R.any(R.flip(R.lte)(config.idealS), variances)
