@@ -35,8 +35,8 @@ const mutations = {
     console.time('计算所有方案及其方差')
     const plans = getMergePlans(countries)
     console.timeEnd('计算所有方案及其方差')
-    state.items = plans
-    // state.bestPlans = R.compose(R.map(item => item.data[0][0][1]), R.filter(item => item.data))(plans)
+    state.items = Object.freeze(plans)
+    state.bestPlans = R.compose(R.map(item => item[0][1]), R.filter(Array.isArray))(plans)
   },
   addLog (state, log) {
     state.logs.push(log)

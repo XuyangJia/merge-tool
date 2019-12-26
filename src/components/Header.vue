@@ -26,7 +26,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('zones', {
+    ...mapGetters('merge', {
       countries: 'countries',
       bestPlans: 'bestPlans'
     })

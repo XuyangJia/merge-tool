@@ -6,14 +6,12 @@ const { Cright1, Cright2, Cright3, Cright4, Cright5, Cright6, ratio } = config.C
 const minNum = config.numRight[0][0]
 const maxNum = config.maxNum
 
-const STATUS_OK = -1
 const STATUS_ZONE_SHORT = 0
 const STATUS_NOT_ENOUGH = 1
 const STATUS_TOO_MUCH = 2
 const STATUS_NOT_EXIST = 3
 
 const filed = (status, msg) => ({ status, msg })
-const success = data => ({ status: STATUS_OK, data })
 
 let tempVariances = null
 let tempData = null
@@ -28,6 +26,8 @@ let minPowerfulNum = 0
 let minActiveNum = 0
 let minActivePowerSum = 0
 let minPay = 0
+let cursor = 0
+let zoneNum = 0
 
 function sendMsg (msg) {
   console.log(msg)
@@ -91,7 +91,7 @@ function calculate (data) {
 
   const variances = R.map(R.compose(variance, R.map(item => R.map(i => data[i], item))), plans)
   const exist = R.any(R.flip(R.lte)(config.idealS), variances)
-  const result = success([R.sortBy(R.prop('0'), R.zip(variances, plans)), data])
+  const result = R.sortBy(R.prop('0'), R.zip(variances, plans))
   if (exist) {
     return result
   } else {
@@ -117,15 +117,15 @@ function chooseBest () {
   return tempVariances[index]
 }
 
-function testMerge (zoneNum, countries) {
+function testMerge (countries) {
   zoneNum++
   const current = countries.slice(0, zoneNum * 3)
   const testData = getSingleMergePlan(current)
   if (testData.status === STATUS_TOO_MUCH || (testData.status === STATUS_NOT_EXIST && countries.length < (zoneNum + 1) * 3)) {
     return chooseBest()
-  } else if (testData.status !== STATUS_OK && countries.length >= (zoneNum + 1) * 3) {
+  } else if (!Array.isArray(testData) && countries.length >= (zoneNum + 1) * 3) {
     if (testData.status === STATUS_NOT_ENOUGH || testData.status === STATUS_NOT_EXIST) {
-      return testMerge(zoneNum, countries)
+      return testMerge(countries)
     }
   }
   return testData
@@ -133,10 +133,12 @@ function testMerge (zoneNum, countries) {
 
 function getAllMergePlan (countries, plans) {
   tempVariances = [] // 清空临时记录
-  const plan = testMerge(1, countries)
-  plans.push(plan)
-  if (plan.status === STATUS_OK) {
-    countries.splice(0, plan.data[1].length)
+  zoneNum = 1
+  const plan = testMerge(countries)
+  plans.push([plan, cursor, zoneNum])
+  if (Array.isArray(plan)) {
+    cursor += zoneNum
+    countries.splice(0, zoneNum * 3)
     if (countries.length) {
       return getAllMergePlan(countries, plans)
     }
@@ -186,6 +188,7 @@ export function getCright (x) {
 }
 
 export function getMergePlans (countries, single) {
+  countries = countries.concat()
   if (single) {
     return getSingleMergePlan(countries)
   }

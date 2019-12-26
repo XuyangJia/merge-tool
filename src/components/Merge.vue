@@ -2,7 +2,7 @@
   <div>
     <Header/>
     <el-collapse>
-      <MyCollapse v-for="(item, index) in plans" :key="index" :initialPlan="item" />
+      <MyCollapse v-for="(item, index) in plans" :key="index" :planId="index" />
     </el-collapse>
   </div>
 </template>
@@ -10,13 +10,13 @@
 <script>
 import { mapGetters } from 'vuex'
 import Header from './Header.vue'
-import MyCollapse from './MyCollapse.vue'
+import MyCollapse from './MyCollapse2.vue'
 export default {
   data: function () {
     return {}
   },
   computed: {
-    ...mapGetters('zones', {
+    ...mapGetters('merge', {
       plans: 'plans'
     })
   },

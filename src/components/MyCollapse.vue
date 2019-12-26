@@ -26,14 +26,22 @@
       :data="tableData"
       header-cell-class-name="my-header"
       cell-class-name="my-cell"
-      size="small"
+      size="mini"
+      fit
       border
-      stripe
-      style="width: 100%">
+      stripe>
       <el-table-column
         prop="zone"
         width="60"
         label="区服">
+      </el-table-column>
+      <el-table-column
+        prop="country"
+        width="50"
+        label="国家">
+        <template slot-scope="scope">
+          <span :class="`country${scope.row.country}`">{{['魏','蜀','吴'][scope.row.country]}}</span>
+        </template>
       </el-table-column>
       <el-table-column
         prop="days"
@@ -41,20 +49,12 @@
         label="开服天数">
       </el-table-column>
       <el-table-column
-        prop="country"
-        width="50"
-        label="国家">
-        <template slot-scope="scope">
-        <el-button :type="['primary', 'success', 'danger'][scope.row.country]" circle size="mini">{{['魏','蜀','吴'][scope.row.country]}}</el-button>
-      </template>
-      </el-table-column>
-      <el-table-column
         prop="target"
         label="目标国家">
         <template slot-scope="scope">
-        <el-select v-model="scope.row.target" size="mini">
-          <el-option v-for="(item, index) in options" :key="index" :label="item" :value="index"></el-option>
-        </el-select>
+          <el-select v-model="scope.row.target" size="mini">
+            <el-option v-for="(item, index) in options" :key="index" :label="item" :value="index"></el-option>
+          </el-select>
       </template>
       </el-table-column>
       <el-table-column
@@ -81,7 +81,6 @@
       </el-table-column>
       <el-table-column
         prop="topPower"
-        sortable
         label="尖端战力">
       </el-table-column>
       <el-table-column
@@ -135,7 +134,8 @@
       cell-class-name="my-cell"
       border
       stripe
-      style="width: 100%">
+      size="mini"
+      fit>
       <el-table-column
         prop="zone"
         width="60"
@@ -146,8 +146,8 @@
         width="50"
         label="国家">
         <template slot-scope="scope">
-        <el-button :type="['primary', 'success', 'danger'][scope.row.country]" circle size="mini">{{['魏','蜀','吴'][scope.row.country]}}</el-button>
-      </template>
+          <span :class="`country${scope.row.country}`">{{['魏','蜀','吴'][scope.row.country]}}</span>
+        </template>
       </el-table-column>
       <el-table-column
         prop="powerfulNum"
@@ -194,10 +194,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import * as R from 'ramda'
 import { variance } from '../js/variance'
 export default {
-  props: [ 'initialPlan' ],
+  props: [ 'plans' ],
   data () {
     return {
       zoneNum: 2,
@@ -206,7 +207,6 @@ export default {
       servers: [1, 2, 3],
       variance: 0,
       tableData: null,
-      plans: null,
       planDIY: null,
       varianceDIY: null,
       countryData: null,
@@ -215,13 +215,10 @@ export default {
     }
   },
   created: function () {
-    if (this.initialPlan.status === -1) {
-      const allPlans = this.initialPlan.data[0]
-      this.plans = allPlans
-      this.countryData = this.initialPlan.data[1]
+    if (Array.isArray(this.plans)) {
       this.planIndex = 0
     } else {
-      this.errMsg = this.initialPlan.msg
+      this.errMsg = this.plans.msg
     }
   },
   watch: {
@@ -235,23 +232,8 @@ export default {
   methods: {
     initPlanData: function (index) {
       this.planDIY = this.varianceDIY = null
-      const planData = this.plans[index]
-      this.variance = planData[0]
-      const temp = []
-      planData[1].forEach((arr, i) => {
-        arr.forEach(ranking => {
-          const obj = Object.assign({}, this.countryData[ranking])
-          obj.target = i
-          temp.push(obj)
-        })
-      })
-      this.tableData = temp.sort((a, b) => {
-        if (a.zone !== b.zone) {
-          return a.zone - b.zone
-        } else {
-          return a.country - b.country
-        }
-      })
+      this.variance = this.plans[index][0]
+      console.log(this.plans)
     },
     refresh: function () {
       const countries0 = this.tableData.filter(item => item.target === 0)
@@ -276,6 +258,9 @@ export default {
       arr.push(this.countryData[this.countryData.length - 1])
       return arr.map(x => x.zone).join('-') + '区'
     },
+    ...mapGetters('merge', {
+      countries: 'countries'
+    }),
     table2Data: function () {
       const keys = Object.keys(this.tableData[0])
       const diff = (a, b) => { return a - b }
@@ -305,6 +290,15 @@ export default {
   .my-cell {
     padding: 1px 0 !important;
     text-align: center !important;
+  }
+  .country0 {
+    color: #409EFF;
+  }
+  .country1 {
+    color: #67C23A;
+  }
+  .country2 {
+    color: #F56C6C;
   }
   .el-col {
     border-radius: 4px;

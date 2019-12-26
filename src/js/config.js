@@ -36,23 +36,27 @@ export default {
     { coin: 500, item036: 5 },
     { coin: 200, item036: 10 }
   ],
-  keys: [
-    ['zone', '区服'],
-    ['days', '开服天数'],
-    ['country', '国家'],
-    ['capitalNum', '都城数'],
-    ['cityNum', '城池总数'],
-    ['powerfulNum', '活跃高战玩家数'],
-    ['activeNum', '活跃中坚玩家数'],
-    ['rankScore', '排名积分'],
-    ['topPower', '活跃尖端战力'],
-    ['activePowerSum', '活跃总战力'],
-    ['activePay30', '30日充值'],
-    ['activePay', '活跃实际充值'],
-    ['activePayFake', '活跃虚拟充值'],
-    ['activeCoin', '活跃Coin'],
-    ['multiplePower', '综合国力'],
-    ['powerTop20', '前20战功'],
-    ['topPower1', '单将最高战力']
-  ]
+  titles: {
+    zone: '区服',
+    days: '开服天数',
+    country: '国家',
+    capitalNum: '都城数',
+    cityNum: '城池总数',
+    powerfulNum: '活跃高战玩家数',
+    activeNum: '活跃中坚玩家数',
+    rankScore: '排名积分',
+    topPower: '活跃尖端战力',
+    activePowerSum: '活跃总战力',
+    activePay30: '30日充值',
+    activePay: '活跃实际充值',
+    activePayFake: '活跃虚拟充值',
+    activeCoin: '活跃Coin',
+    multiplePower: '综合国力',
+    top20: 'Top20',
+    top1: '单将最高战力',
+    target: '目标国家',
+    countryNum: '国家数',
+    extraCoin: '补偿coin'
+  },
+  keys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay30', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'top20', 'top1']
 }
