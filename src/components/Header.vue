@@ -3,10 +3,7 @@
     <el-col :span="2">
       <el-button type="warning" @click="backToHome"><i class="el-icon-s-home el-icon--left">主页</i></el-button>
     </el-col>
-    <el-col :span="3" :offset="1">
-      <el-input placeholder="请输入方差" v-model="variance"><template slot="prepend">理想方差:</template></el-input>
-    </el-col>
-    <el-col :span="16">
+    <el-col :span="20">
     </el-col>
     <el-col :span="2">
       <el-button type="success" @click="exportPlans">导出<i class="el-icon-download el-icon--right"></i></el-button>
@@ -15,15 +12,12 @@
 </template>
 
 <script>
-// import * as R from 'ramda'
+import * as R from 'ramda'
 import { mapGetters } from 'vuex'
-import config from '../js/config'
-// import { saveAs } from 'file-saver'
+import { saveAs } from 'file-saver'
 export default {
   data: function () {
-    return {
-      variance: config.idealS
-    }
+    return {}
   },
   computed: {
     ...mapGetters('merge', {
@@ -36,34 +30,26 @@ export default {
       this.$router.push('/')
     },
     exportPlans: function () {
-      // // 二维数组转换为一维数组
-      // const isNumber = x => {
-      //   return !isNaN(x)
-      // }
-      // const mapIndexed = R.addIndex(R.map)
-      // const getZone = index => `h1_${100 + index}`
-      // let cursor = 0 // 计算进度
-      // const plans = mapIndexed((arr, index) => {
-      //   const result = {}
-      //   const toZone = getZone(index)
-      //   const plan = []
-      //   mapIndexed((arr2, country) => {
-      //     R.compose(R.map(i => (plan[i] = country)), R.filter(isNumber))(arr2)
-      //   })(arr)
-      //   let countryArr = this.countries.slice(cursor, cursor + plan.length)
-      //   mapIndexed((country, i) => {
-      //     const data = countryArr[i]
-      //     const reward = R.pick(Object.keys((data.reward)))(data.reward)
-      //     const zone = data.zone
-      //     result[zone] || (result[zone] = { to_zone: toZone, reward, country: [] })
-      //     result[zone].country[data.country] = country
-      //   })(plan)
-      //   cursor += plan.length // 移动游标
-      //   return result
-      // })(this.bestPlans)
-      // const masterPlan = R.reduce(R.merge, {})(plans)
-      // const blob = new Blob([JSON.stringify(masterPlan)], { type: 'text/plain;charset=utf-8' })
-      // saveAs(blob, 'plans.json')
+      const mapIndexed = R.addIndex(R.map)
+      const getZone = index => `h1_${100 + index}`
+      let cursor = 0 // 计算进度
+      const plans = mapIndexed((plan, index) => {
+        const result = {}
+        const toZone = getZone(index)
+        let countryArr = this.countries.slice(cursor, cursor + plan.length)
+        mapIndexed((country, i) => {
+          const data = countryArr[i]
+          const reward = R.pick(Object.keys((data.reward)))(data.reward)
+          const zone = data.zone
+          result[zone] || (result[zone] = { to_zone: toZone, reward, country: [] })
+          result[zone].country[data.country] = country
+        })(plan)
+        cursor += plan.length // 移动游标
+        return result
+      })(this.bestPlans)
+      const masterPlan = R.reduce(R.merge, {})(plans)
+      const blob = new Blob([JSON.stringify(masterPlan)], { type: 'text/plain;charset=utf-8' })
+      saveAs(blob, 'plans.json')
     }
   }
 }

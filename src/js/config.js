@@ -4,7 +4,7 @@ export default {
   Right3: 40,
   Right4: 80,
   Right5: 60,
-  Right6: 60,
+  Right6: 50,
   idealS: 500, // 理想比较方差
   maxNum: 250, // 人数上限
   numRight: [

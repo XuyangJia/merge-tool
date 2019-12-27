@@ -11,7 +11,7 @@ const STATUS_NOT_ENOUGH = 1
 const STATUS_TOO_MUCH = 2
 const STATUS_NOT_EXIST = 3
 
-const filed = (status, msg) => ({ status, msg })
+const mapIndexed = R.addIndex(R.map)
 
 let tempVariances = null
 let tempData = null
@@ -28,6 +28,7 @@ let minActivePowerSum = 0
 let minPay = 0
 let cursor = 0
 let zoneNum = 0
+const filed = (status, msg) => ({ status, msg })
 
 function sendMsg (msg) {
   console.log(msg)
@@ -35,16 +36,18 @@ function sendMsg (msg) {
 }
 
 function getSingleMergePlan (data) {
-  const zoneNum = data.length / 3
+  const num = data.length / 3
   const sum = countPlayers(data)
-  if (zoneNum < 2) {
-    return filed(STATUS_ZONE_SHORT, '区数量不足')
+  const zonesStr = ` (${data[0].zone}区-${data[data.length - 1].zone}区) `
+  if (num < 2) {
+    zoneNum = num
+    return filed(STATUS_ZONE_SHORT, `区数量不足${zonesStr}`)
   } else if (sum < minNum) {
-    return filed(STATUS_NOT_ENOUGH, `人数不足: ${sum} < ${minNum}`)
+    return filed(STATUS_NOT_ENOUGH, `人数不足: ${sum} < ${minNum}${zonesStr}`)
   } else if (sum > maxNum) {
-    return filed(STATUS_TOO_MUCH, '人数过多')
+    return filed(STATUS_TOO_MUCH, `人数过多: ${sum} > ${maxNum}${zonesStr}`)
   } else {
-    sendMsg(`尝试${data[0].zone}区-${data[data.length - 1].zone}区 共计${zoneNum}个区进行合并，当前总人数${sum}`)
+    sendMsg(`尝试${zonesStr} 共计${num}个区进行合并，当前总人数${sum}`)
     return calculate(data)
   }
 }
@@ -67,11 +70,15 @@ function allocateTop3 (top3) {
 }
 
 function calculate (data) {
-  const sortByPower = R.sortBy(R.prop('topPower'))
+  const sortWithPower = R.sortWith([R.descend(R.prop('topPower'))])
   tempData = data
-  const temp = sortByPower(data.concat()) // 按照尖端战力排序后取前三
+  const temp = sortWithPower(data.concat()) // 按照尖端战力排序后取前三
   const top3 = R.take(3)(temp)
-  const base = allocateTop3(top3).map(i => data.indexOf(temp[i]))
+  const base = Array(temp.length).fill(-1)
+  allocateTop3(top3).map(i => {
+    const index = data.indexOf(temp[i])
+    base[index] = i
+  })
 
   Crights = R.map(getCright)(data)
   criticalCright = Math.floor(R.sum(Crights) * ratio)
@@ -86,10 +93,10 @@ function calculate (data) {
   minPay = Math.floor(R.compose(R.sum, R.map(x => (x.activePay + x.activePayFake)))(tempData) / 5)
 
   // 列出所有方案
-  const plans = getAllPlans(base, temp.length)
+  const plans = getAllPlans(base)
   sendMsg(`方案数量：${plans.length}`)
 
-  const variances = R.map(R.compose(variance, R.map(item => R.map(i => data[i], item))), plans)
+  const variances = R.map(plan => variance(plan, tempData), plans)
   const exist = R.any(R.flip(R.lte)(config.idealS), variances)
   const result = R.sortBy(R.prop('0'), R.zip(variances, plans))
   if (exist) {
@@ -146,37 +153,57 @@ function getAllMergePlan (countries, plans) {
   return plans
 }
 
-function getAllPlans (arr, num) {
-  function insert (item, pos, array) {
+function getAllPlans (base) {
+  function cover (item, pos, array) {
     const result = R.clone(array)
-    result[pos].push(item)
+    result[pos] = item
     return result
   }
 
-  let result = [R.map(x => [x])(arr)]
-  if (num <= 3) return result
-  Array(num).fill('').forEach((item, i) => {
-    if (!arr.includes(i)) {
-      const curriedInsert = R.curry(insert)(i)
-      result = R.ap([curriedInsert(0), curriedInsert(1), curriedInsert(2)])(result)
-      result = result.filter(arr => {
-        return !arr.some(noFeasibility)
-      })
+  let result = [base]
+  for (let i = 0, len = base.length; i < len; ++i) {
+    if (result[0][i] === -1) {
+      let tempResult = []
+      for (let j = 0, len2 = result.length; j < len2; ++j) {
+        const arr = R.map(item => cover(item, i, result[j]))([0, 1, 2])
+        tempResult = tempResult.concat(arr.filter(feasibility))
+      }
+      result = tempResult
     }
-  })
-  return R.filter(R.all(workable))(result)
+  }
+  return R.filter(workable)(result)
 }
 
-function noFeasibility (arr) {
-  return (R.compose(R.sum, R.map(i => Crights[i]))(arr) > criticalCright ||
-  R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) > criticalPowerfulNum ||
-  R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) > criticalActiveNum ||
-  R.compose(R.sum, R.map(i => tempData[i].topPower))(arr) > criticalTopPower ||
-  R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) > criticalActivePowerSum ||
-  R.compose(R.sum, R.map(i => (tempData[i].activePay + tempData[i].activePayFake)))(arr) > criticalPay)
+function feasibility (arr) {
+  return R.all(id => {
+    const arr2 = []
+    mapIndexed((val, idx) => {
+      val === id && arr2.push(idx)
+    })(arr)
+    return feasibilityWithCounrey(arr2)
+  })([0, 1, 2])
+}
+
+function feasibilityWithCounrey (arr) {
+  return (R.compose(R.sum, R.map(i => Crights[i]))(arr) < criticalCright &&
+  R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) < criticalPowerfulNum &&
+  R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) < criticalActiveNum &&
+  R.compose(R.sum, R.map(i => tempData[i].topPower))(arr) < criticalTopPower &&
+  R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) < criticalActivePowerSum &&
+  R.compose(R.sum, R.map(i => (tempData[i].activePay + tempData[i].activePayFake)))(arr) < criticalPay)
 }
 
 function workable (arr) {
+  return R.all(id => {
+    const arr2 = []
+    mapIndexed((val, idx) => {
+      val === id && arr2.push(idx)
+    })(arr)
+    return workableWithCounrey(arr2)
+  })([0, 1, 2])
+}
+
+function workableWithCounrey (arr) {
   return (R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) > minPowerfulNum &&
   R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) > minActiveNum &&
   R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) > minActivePowerSum &&
@@ -187,10 +214,11 @@ export function getCright (x) {
   return Cright1 * x.topPower + Cright2 * x.activePowerSum + Cright3 * (x.activePay + x.activePayFake) + Cright4 * x.activePay30 + Cright5 * x.powerfulNum + Cright6 * x.activeNum
 }
 
-export function getMergePlans (countries, single) {
+export function getMergePlans (countries, progress, single) {
+  cursor = progress || 0
   countries = countries.concat()
   if (single) {
-    return getSingleMergePlan(countries)
+    return [getSingleMergePlan(countries), cursor, zoneNum]
   }
   return getAllMergePlan(countries, [])
 }

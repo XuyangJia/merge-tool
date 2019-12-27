@@ -10,7 +10,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import Header from './Header.vue'
-import MyCollapse from './MyCollapse2.vue'
+import MyCollapse from './MyCollapse.vue'
 export default {
   data: function () {
     return {}

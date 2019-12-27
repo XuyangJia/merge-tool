@@ -8,6 +8,7 @@ const state = {
   countries: [],
   items: [],
   bestPlans: [],
+  config: null,
   logs: null
 }
 
@@ -16,7 +17,29 @@ const getters = {
   countries: state => state.countries,
   plans: state => state.items,
   bestPlans: state => state.bestPlans,
+  config: state => state.config,
   logs: state => state.logs
+}
+
+function calculatePlans (state, planIndex, zoneNum) {
+  let plans = null
+  if (zoneNum) {
+    console.log(planIndex, zoneNum)
+    const currentPlan = state.items[planIndex]
+    plans = state.items.slice(0, planIndex)
+    const cursor = currentPlan[1]
+    const startPos = cursor * 3
+    const endPos = startPos + zoneNum * 3
+    const plan = getMergePlans(state.countries.slice(startPos, endPos), cursor, true)
+    plans.push(plan)
+    if (state.countries.length > endPos) {
+      const remainPlans = getMergePlans(state.countries.slice(endPos), cursor + zoneNum)
+      plans = plans.concat(remainPlans)
+    }
+  } else {
+    plans = getMergePlans(state.countries)
+  }
+  state.items = Object.freeze(plans)
 }
 
 // mutations
@@ -28,15 +51,21 @@ const mutations = {
       const rewards = R.map(x => {
         const equalizeDay = maxDay + (1000 / x.coin)
         return R.map(y => y * (equalizeDay - obj.days))(x)
-      })(config.reward)
+      })(state.config.reward)
       obj.reward = R.mergeWith(R.add, ...rewards)
       return obj
     })(countries))
-    console.time('计算所有方案及其方差')
-    const plans = getMergePlans(countries)
-    console.timeEnd('计算所有方案及其方差')
-    state.items = Object.freeze(plans)
-    state.bestPlans = R.compose(R.map(item => item[0][1]), R.filter(Array.isArray))(plans)
+    calculatePlans(state)
+  },
+  setConfig (state, data) {
+    state.config = Object.assign(config, data)
+  },
+  refreshPlans (state, data) {
+    calculatePlans(state, ...data)
+  },
+  setBestPlan (state, data) {
+    const [planIndex, plan] = data
+    state.bestPlans[planIndex] = plan[1]
   },
   addLog (state, log) {
     state.logs.push(log)
@@ -47,6 +76,15 @@ const mutations = {
 const actions = {
   setCountryData ({ commit }, origindata) {
     commit('setCountries', origindata)
+  },
+  setConfigData ({ commit }, data) {
+    commit('setConfig', data)
+  },
+  changeZoneNum ({ commit }, data) {
+    commit('refreshPlans', data)
+  },
+  setBestPlan ({ commit }, data) {
+    commit('setBestPlan', data)
   },
   addLog ({ commit }, log) {
     commit('addLog', log)
