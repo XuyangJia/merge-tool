@@ -110,7 +110,7 @@ export default {
       if (plan) {
         this.variance = plan[0]
         this.currntPlan = plan[1].concat()
-        this.currntPlan = [1, 1, 2, 0, 1, 0, 2, 2, 1, 2, 2, 0]
+        // this.currntPlan = [1, 1, 2, 0, 1, 0, 2, 2, 1, 2, 2, 0]
         this.$store.dispatch('merge/setBestPlan', [this.planId, plan])
       }
     },

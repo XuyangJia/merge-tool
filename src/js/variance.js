@@ -17,7 +17,7 @@ function variance (plan, countries) {
   const activeCoins = getSumByProp(plan, countries, config.Right6, ['activeCoin']) // 计算国家潜力值 活跃coin
 
   let totalNum = R.compose(R.sum, R.map(x => (x.powerfulNum + x.activeNum)))(countries)
-  console.log(`总人数：${totalNum}`)
+  // console.log(`总人数：${totalNum}`)
   totalNum = Math.floor(totalNum * 0.1) * 10
 
   let numRight = R.find(x => {
@@ -25,11 +25,11 @@ function variance (plan, countries) {
   })(config.numRight)
   numRight = numRight || config.numRight[config.numRight.length - 1]
 
-  console.log({ topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins })
+  // console.log({ topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins })
   const potentials = getPotentials(topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins)
   const potentialAverage = average(potentials)
-  console.log(`potentials：${potentials}`)
-  console.log(`平均潜力值：${potentialAverage}`)
+  // console.log(`potentials：${potentials}`)
+  // console.log(`平均潜力值：${potentialAverage}`)
   return Math.round(R.compose(R.sum, R.map(num => Math.pow(num - potentialAverage, 2)))(potentials) / numRight[1])
 }
 
@@ -47,7 +47,7 @@ function getTopPowers (plan, countries) {
     topPowerSum += val.topPower
   })(rank)
   arr = R.map(R.sum)(arr)
-  console.log('topPower', arr, topPowerSum)
+  // console.log('topPower', arr, topPowerSum)
   return R.map(x => x / (topPowerSum / 3), arr)
 }
 
@@ -56,7 +56,7 @@ function getSumByProp (plan, countries, right, props) {
   mapIndexed((val, idx) => {
     arr[plan[idx]] += R.compose(R.sum, R.map(prop => val[prop]))(props)
   }, countries)
-  console.log(props.join('-'), arr)
+  // console.log(props.join('-'), arr)
   return R.map(x => x * right / average(arr), arr)
 }
 
