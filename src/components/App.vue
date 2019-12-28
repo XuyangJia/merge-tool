@@ -1,12 +1,17 @@
 <template>
   <div id="app">
+    <Header v-if="$route.path !== '/index'"/>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
+import Header from './Header.vue'
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    Header
+  }
 }
 </script>
 

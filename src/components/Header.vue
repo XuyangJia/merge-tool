@@ -21,17 +21,18 @@ export default {
   },
   computed: {
     ...mapGetters('merge', {
+      mergeTimes: 'mergeTimes',
       countries: 'countries',
       bestPlans: 'bestPlans'
     })
   },
   methods: {
     backToHome: function () {
-      this.$router.push('/')
+      this.$router.push('/index')
     },
     exportPlans: function () {
       const mapIndexed = R.addIndex(R.map)
-      const getZone = index => `h1_${100 + index}`
+      const getZone = index => `h${this.mergeTimes}_${100 + index}`
       let cursor = 0 // 计算进度
       const plans = mapIndexed((plan, index) => {
         const result = {}
@@ -39,9 +40,8 @@ export default {
         let countryArr = this.countries.slice(cursor, cursor + plan.length)
         mapIndexed((country, i) => {
           const data = countryArr[i]
-          const reward = R.pick(Object.keys((data.reward)))(data.reward)
           const zone = data.zone
-          result[zone] || (result[zone] = { to_zone: toZone, reward, country: [] })
+          result[zone] || (result[zone] = { to_zone: toZone, reward: data.reward, country: [] })
           result[zone].country[data.country] = country
         })(plan)
         cursor += plan.length // 移动游标

@@ -16,7 +16,10 @@ function variance (plan, countries) {
   const playerNums = getSumByProp(plan, countries, config.Right5, ['powerfulNum', 'activeNum']) // 计算国家潜力值 玩家数
   const activeCoins = getSumByProp(plan, countries, config.Right6, ['activeCoin']) // 计算国家潜力值 活跃coin
 
-  const totalNum = Math.floor(R.sum(playerNums) * 0.1) * 10
+  let totalNum = R.compose(R.sum, R.map(x => (x.powerfulNum + x.activeNum)))(countries)
+  console.log(`总人数：${totalNum}`)
+  totalNum = Math.floor(totalNum * 0.1) * 10
+
   let numRight = R.find(x => {
     return totalNum === x[0]
   })(config.numRight)
@@ -34,7 +37,6 @@ function variance (plan, countries) {
  * 计算国家潜力值 尖端战力
  */
 function getTopPowers (plan, countries) {
-  console.log('getTopPowers')
   const rank = R.sort(R.descend(R.prop('topPower')))(countries) // 当前区服战力排行
   let arr = [[], [], []]
   let topPowerSum = 0
@@ -62,10 +64,7 @@ function getSumByProp (plan, countries, right, props) {
  * 计算国家潜力值
  */
 function getPotentials (...args) {
-  return R.map(arr => {
-    console.log(arr)
-    return R.sum(arr)
-  })(R.transpose(args))
+  return R.map(R.sum)(R.transpose(args))
 }
 
 /**

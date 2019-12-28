@@ -55,8 +55,9 @@ export default {
     top20: 'Top20',
     top1: '单将最高战力',
     target: '目标国家',
-    countryNum: '国家数',
-    extraCoin: '补偿coin'
+    countryNum: '原国家数',
+    extraCoin: '补偿coin',
+    coinSum: '总coin'
   },
   keys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay30', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'top20', 'top1']
 }

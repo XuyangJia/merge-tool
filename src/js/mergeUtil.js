@@ -1,7 +1,7 @@
 import * as R from 'ramda'
 import { variance } from './variance'
 import config from './config'
-// import store from '../store'
+import store from '../store'
 const { Cright1, Cright2, Cright3, Cright4, Cright5, Cright6, ratio } = config.Cright
 const minNum = config.numRight[0][0]
 const maxNum = config.maxNum
@@ -32,7 +32,7 @@ const filed = (status, msg) => ({ status, msg })
 
 function sendMsg (msg) {
   console.log(msg)
-  // store.dispatch('zones/addLog', msg)
+  store.dispatch('merge/addLog', msg)
 }
 
 function getSingleMergePlan (data) {
@@ -119,9 +119,11 @@ function countPlayers (arr) {
 
 function chooseBest () {
   const sortByFirstItem = R.sortBy(R.prop(0))
-  const minVariances = R.map(obj => sortByFirstItem(obj.data[0])[0])(tempVariances)
+  const minVariances = R.map(obj => sortByFirstItem(obj)[0])(tempVariances)
   const index = minVariances.findIndex(x => x === sortByFirstItem(minVariances)[0])
-  return tempVariances[index]
+  const result = tempVariances[index]
+  zoneNum = result[0][1].length / 3
+  return result
 }
 
 function testMerge (countries) {
@@ -218,7 +220,9 @@ export function getMergePlans (countries, progress, single) {
   cursor = progress || 0
   countries = countries.concat()
   if (single) {
-    return [getSingleMergePlan(countries), cursor, zoneNum]
+    tempVariances = []
+    const plan = getSingleMergePlan(countries)
+    return tempVariances[0] || plan
   }
   return getAllMergePlan(countries, [])
 }

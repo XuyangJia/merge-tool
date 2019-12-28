@@ -2,7 +2,7 @@
   <el-collapse-item>
     <template slot="title"> <h2>{{ title }}</h2> </template>
     <el-divider></el-divider>
-    <el-row :gutter="20">
+    <el-row v-if="errMsg === ''" :gutter="20">
       <el-col :span="3" :offset="2">
         <el-select v-model="planIndex">
           <el-option v-for="(item, index) in variances" :key="index" :label="`方案${index + 1} 方差：${item[0]}`" :value="index"></el-option>
@@ -110,6 +110,7 @@ export default {
       if (plan) {
         this.variance = plan[0]
         this.currntPlan = plan[1].concat()
+        this.currntPlan = [1, 1, 2, 0, 1, 0, 2, 2, 1, 2, 2, 0]
         this.$store.dispatch('merge/setBestPlan', [this.planId, plan])
       }
     },
@@ -172,7 +173,7 @@ export default {
             type: 'warning'
           })
         } else {
-          this.$store.dispatch('merge/changeZoneNum', [this.planId, num])
+          this.$router.push({ path: 'calculate', params: { data: [this.planId, num] } })
         }
       }
     }
@@ -193,12 +194,20 @@ export default {
       return ['魏', '蜀', '吴']
     },
     options: function () {
-      const arr = this.config.keys.concat()
-      arr.splice(3, 0, 'target')
-      return arr
+      const result = this.config.keys.concat()
+      let index = result.indexOf('activeCoin')
+      result.splice(index + 1, 0, 'extraCoin')
+      index = result.indexOf('country')
+      result.splice(index + 1, 0, 'target')
+      return result
     },
     options2: function () {
-      return R.without(['days', 'rankScore', 'capitalNum', 'cityNum', 'top20'], this.config.keys)
+      const result = R.without(['days', 'target', 'rankScore', 'capitalNum', 'cityNum', 'top20'], this.options)
+      let index = result.indexOf('country')
+      result.splice(index + 1, 0, 'countryNum')
+      index = result.indexOf('extraCoin')
+      result.splice(index + 1, 0, 'coinSum')
+      return result
     },
     ...mapGetters('merge', {
       countries: 'countries',
@@ -207,7 +216,7 @@ export default {
     }),
     currntPlanSum: function () {
       if (!this.currntPlan) return []
-      const keys = this.config.keys
+      const keys = R.without(['coinSum'], this.options2)
       const diff = (a, b) => { return a - b }
       const countryData = this.countries.slice(this.startZone * 3, this.endZone * 3)
       return [0, 1, 2].map(countryId => {
@@ -220,8 +229,8 @@ export default {
         })
         result.zone = 123
         result.country = countryId
-        // result.coinSum = result.activeCoin + result.extraCoin
-        result.coinSum = result.activeCoin
+        result.countryNum = arr.length
+        result.coinSum = result.activeCoin + result.extraCoin
         result.top1 = R.compose(R.nth(-1), R.sort(diff), R.map(R.prop('top1')))(arr)
         return result
       }, this)

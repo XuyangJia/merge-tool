@@ -8,24 +8,24 @@ module.exports = {
   productionSourceMap: false,
   devServer: {
     port: port,
-    open: true,
+    open: false,
     overlay: {
       warnings: false,
       errors: true
     },
     proxy: {
-      '/api': {
-        target: 'http://qh.ptkill.com/',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/api': '/'
-        }
-      },
-      '/foo': {
+      '/sg3': {
         target: 'http://sg3.ptkill.com/',
         changeOrigin: true,
         pathRewrite: {
-          '^/api': '/'
+          '^/sg3': '/'
+        }
+      },
+      '/qh': {
+        target: 'http://qh.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/qh': '/'
         }
       }
     }
