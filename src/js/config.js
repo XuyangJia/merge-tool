@@ -1,9 +1,9 @@
 export default {
-  Right1: [100, 80, 50, 20, 10, 0],
-  Right2: 100,
-  Right3: 40,
-  Right4: 80,
-  Right5: 60,
+  Right1: [50, 40, 30, 20, 10, 0],
+  Right2: 200,
+  Right3: 30,
+  Right4: 60,
+  Right5: 200,
   Right6: 50,
   idealS: 500, // 理想比较方差
   maxNum: 250, // 人数上限
