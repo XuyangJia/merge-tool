@@ -128,7 +128,7 @@ function testMerge (countries) {
   zoneNum++
   const current = countries.slice(0, zoneNum * 3)
   const testData = getSingleMergePlan(current)
-  if (testData.status === STATUS_TOO_MUCH || (testData.status === STATUS_NOT_EXIST && countries.length < (zoneNum + 1) * 3)) {
+  if ((testData.status === STATUS_TOO_MUCH && R.flatten(tempVariances).length) || (testData.status === STATUS_NOT_EXIST && countries.length < (zoneNum + 1) * 3)) {
     return chooseBest()
   } else if (!Array.isArray(testData) && countries.length >= (zoneNum + 1) * 3) {
     if (testData.status === STATUS_NOT_ENOUGH || testData.status === STATUS_NOT_EXIST) {
@@ -168,6 +168,7 @@ function getAllPlans (base) {
         const arr = R.map(item => cover(item, i, result[j]))([0, 1, 2])
         tempResult = tempResult.concat(arr.filter(feasibility))
       }
+      if (tempResult.length === 0) return []
       result = tempResult
     }
   }

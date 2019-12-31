@@ -6,7 +6,7 @@ export default {
   Right5: 200,
   Right6: 50,
   idealS: 500, // 理想比较方差
-  maxNum: 250, // 人数上限
+  maxNum: 260, // 人数上限
   numRight: [
     [110, 0.6], // 人数下限
     [120, 0.7],

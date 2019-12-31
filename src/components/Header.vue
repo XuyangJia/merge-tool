@@ -29,7 +29,7 @@ export default {
   },
   methods: {
     backToHome: function () {
-      this.$router.push('/index')
+      this.$router.push('/')
     },
     exportPlans: function () {
       const mapIndexed = R.addIndex(R.map)
