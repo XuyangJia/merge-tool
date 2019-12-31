@@ -1,9 +1,6 @@
 <template>
   <div>
-    <h1>dfgsdfgsjgljsdlgjlks</h1>
-    <el-card>
-      <p v-for="(item, index) in logs" :key="index">{{ item }}</p>
-    </el-card>
+    <h1>正在进行合区。。。</h1>
   </div>
 </template>
 
@@ -27,8 +24,7 @@ export default {
   },
   computed: {
     ...mapGetters('merge', {
-      calculateing: 'calculateing',
-      logs: 'logs'
+      calculateing: 'calculateing'
     })
   }
 }

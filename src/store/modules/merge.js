@@ -11,8 +11,7 @@ const state = {
   calculateing: false,
   items: [],
   bestPlans: [],
-  config: null,
-  logs: null
+  config: null
 }
 
 // getters
@@ -23,15 +22,13 @@ const getters = {
   calculateing: state => state.calculateing,
   plans: state => state.items,
   bestPlans: state => state.bestPlans,
-  config: state => state.config,
-  logs: state => state.logs
+  config: state => state.config
 }
 
 function calculatePlans (state, planIndex, zoneNum) {
   let plans = null
   state.calculateing = false
   if (zoneNum) {
-    console.log(planIndex, zoneNum)
     const currentPlan = state.items[planIndex]
     plans = state.items.slice(0, planIndex)
     state.items = []
@@ -55,7 +52,6 @@ function calculatePlans (state, planIndex, zoneNum) {
 // mutations
 const mutations = {
   setCountries (state, countries) {
-    state.logs = ['拿到国家数据，开始计算合服方案']
     const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countries)
     state.countries = Object.freeze(R.map(obj => {
       const rewardCfg = state.config.reward[state.mergeTimes - 1]
@@ -80,9 +76,6 @@ const mutations = {
   setBestPlan (state, data) {
     const [planIndex, plan] = data
     state.bestPlans[planIndex] = plan[1]
-  },
-  addLog (state, log) {
-    state.logs.push(log)
   }
 }
 
@@ -102,9 +95,6 @@ const actions = {
   },
   setBestPlan ({ commit }, data) {
     commit('setBestPlan', data)
-  },
-  addLog ({ commit }, log) {
-    commit('addLog', log)
   }
 }
 

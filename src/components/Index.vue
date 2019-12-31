@@ -40,7 +40,7 @@ export default {
   data: function () {
     return {
       notRequest: true,
-      serverIndex: 1,
+      serverIndex: 0,
       serverOptions: [
         { name: '三国 简体', value: 'http://sg3.ptkill.com', dev: '/sg3' },
         { name: '三国 360', value: 'http://qh.ptkill.com', dev: '/qh' },

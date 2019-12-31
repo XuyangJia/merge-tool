@@ -1,7 +1,6 @@
 import * as R from 'ramda'
 import { variance } from './variance'
 import config from './config'
-import store from '../store'
 const { Cright1, Cright2, Cright3, Cright4, Cright5, Cright6, ratio } = config.Cright
 const minNum = config.numRight[0][0]
 const maxNum = config.maxNum
@@ -32,7 +31,6 @@ const filed = (status, msg) => ({ status, msg })
 
 function sendMsg (msg) {
   console.log(msg)
-  store.dispatch('merge/addLog', msg)
 }
 
 function getSingleMergePlan (data) {
