@@ -58,6 +58,9 @@ function getSumByProp (plan, countries, right, props) {
   }, countries)
   const averageNum = average(arr)
   console.log(props.join('-'), arr)
+  if (averageNum === 0) {
+    return [1, 1, 1]
+  }
   return R.map(x => x * right / averageNum, arr)
 }
 
