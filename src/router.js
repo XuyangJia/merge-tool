@@ -8,11 +8,10 @@ import Calculate from './components/Calculate'
 Vue.use(VueRouter)
 
 export default new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: __dirname,
   routes: [
-    { path: '/', redirect: '/index' },
-    { path: '/index', component: Index },
+    { path: '/', component: Index },
     { path: '/about', component: About },
     { path: '/merge', component: Merge },
     { path: '/calculate', name: 'Calculate', component: Calculate }
