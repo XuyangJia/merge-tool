@@ -6,6 +6,7 @@ import { getMergePlans } from '../../js/mergeUtil'
 // initial state
 const state = {
   mergeTimes: 0, // 拿到的这些国家的当前合服次数
+  startIndex: 0, // 起始位置
   countries: [],
   calculateing: false,
   items: [],
@@ -17,6 +18,7 @@ const state = {
 // getters
 const getters = {
   mergeTimes: state => state.mergeTimes,
+  startIndex: state => state.startIndex,
   countries: state => state.countries,
   calculateing: state => state.calculateing,
   plans: state => state.items,
@@ -54,16 +56,20 @@ function calculatePlans (state, planIndex, zoneNum) {
 const mutations = {
   setCountries (state, countries) {
     state.logs = ['拿到国家数据，开始计算合服方案']
-    state.mergeTimes = 0
     const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countries)
     state.countries = Object.freeze(R.map(obj => {
-      const rewardCfg = state.config.reward[state.mergeTimes]
+      const rewardCfg = state.config.reward[state.mergeTimes - 1]
       const equalizeDay = maxDay + (1000 / rewardCfg.coin)
       obj.reward = R.map(y => y * (equalizeDay - obj.days))(rewardCfg)
       obj.extraCoin = obj.reward.coin
       return obj
     })(countries))
     calculatePlans(state)
+  },
+  setStartZone (state, startId) {
+    const matchs = startId.match(/^h(\d+)_(\d+)$/)
+    state.mergeTimes = parseInt(matchs[1])
+    state.startIndex = parseInt(matchs[2])
   },
   setConfig (state, data) {
     state.config = Object.assign(config, data)
@@ -82,6 +88,9 @@ const mutations = {
 
 // actions
 const actions = {
+  setStartZone ({ commit }, data) {
+    commit('setStartZone', data)
+  },
   setCountryData ({ commit }, origindata) {
     commit('setCountries', origindata)
   },

@@ -22,6 +22,7 @@ export default {
   computed: {
     ...mapGetters('merge', {
       mergeTimes: 'mergeTimes',
+      startIndex: 'startIndex',
       countries: 'countries',
       bestPlans: 'bestPlans'
     })
@@ -32,7 +33,7 @@ export default {
     },
     exportPlans: function () {
       const mapIndexed = R.addIndex(R.map)
-      const getZone = index => `h${this.mergeTimes}_${100 + index}`
+      const getZone = index => `h${this.mergeTimes}_${this.startIndex + index}`
       let cursor = 0 // 计算进度
       const plans = mapIndexed((plan, index) => {
         const result = {}

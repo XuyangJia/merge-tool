@@ -11,6 +11,7 @@ export default new VueRouter({
   mode: 'history',
   base: __dirname,
   routes: [
+    { path: '/', redirect: '/index' },
     { path: '/index', component: Index },
     { path: '/about', component: About },
     { path: '/merge', component: Merge },
