@@ -1,9 +1,6 @@
 import * as R from 'ramda'
 import { variance } from './variance'
-import config from './config'
-const { Cright1, Cright2, Cright3, Cright4, Cright5, Cright6, ratio } = config.Cright
-const minNum = config.numRight[0][0]
-const maxNum = config.maxNum
+let config = null
 
 const STATUS_ZONE_SHORT = 0
 const STATUS_NOT_ENOUGH = 1
@@ -27,6 +24,7 @@ let minActivePowerSum = 0
 let minPay = 0
 let cursor = 0
 let zoneNum = 0
+let ratio = 0
 const filed = (status, msg) => ({ status, msg })
 
 function sendMsg (msg) {
@@ -34,6 +32,13 @@ function sendMsg (msg) {
 }
 
 function getSingleMergePlan (data) {
+  if (!config) {
+    config = JSON.parse(localStorage.getItem('merge-tool-config'))
+  }
+  const minNum = config.numRight[0][0]
+  const maxNum = config.maxNum
+  ratio = config.Cright.ratio
+
   const num = data.length / 3
   const sum = countPlayers(data)
   const zonesStr = ` (${data[0].zone}区-${data[data.length - 1].zone}区) `
@@ -212,6 +217,10 @@ function workableWithCounrey (arr) {
 }
 
 export function getCright (x) {
+  if (!config) {
+    config = JSON.parse(localStorage.getItem('merge-tool-config'))
+  }
+  const { Cright1, Cright2, Cright3, Cright4, Cright5, Cright6 } = config.Cright
   return Cright1 * x.topPower + Cright2 * x.activePowerSum + Cright3 * (x.activePay + x.activePayFake) + Cright4 * x.activePay30 + Cright5 * x.powerfulNum + Cright6 * x.activeNum
 }
 

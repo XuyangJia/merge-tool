@@ -1,6 +1,5 @@
 
 import * as R from 'ramda'
-import config from '../../js/config'
 import { getMergePlans } from '../../js/mergeUtil'
 
 // initial state
@@ -10,8 +9,8 @@ const state = {
   countries: [],
   calculateing: false,
   items: [],
-  bestPlans: [],
-  config: null
+  lastPlans: [],
+  bestPlans: []
 }
 
 // getters
@@ -21,8 +20,8 @@ const getters = {
   countries: state => state.countries,
   calculateing: state => state.calculateing,
   plans: state => state.items,
-  bestPlans: state => state.bestPlans,
-  config: state => state.config
+  lastPlans: state => state.lastPlans,
+  bestPlans: state => state.bestPlans
 }
 
 function calculatePlans (state, planIndex, zoneNum) {
@@ -54,21 +53,23 @@ const mutations = {
   setCountries (state, countries) {
     const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countries)
     state.countries = Object.freeze(R.map(obj => {
-      const rewardCfg = state.config.reward[state.mergeTimes - 1]
+      const config = JSON.parse(localStorage.getItem('merge-tool-config'))
+      const rewardCfg = config.reward[state.mergeTimes - 1]
       const equalizeDay = maxDay + (1000 / rewardCfg.coin)
       obj.reward = R.map(y => y * (equalizeDay - obj.days))(rewardCfg)
       obj.extraCoin = obj.reward.coin
       return obj
     })(countries))
-    calculatePlans(state)
+    if (state.lastPlans.length === 0) {
+      calculatePlans(state)
+    } else {
+      state.calculateing = true
+    }
   },
   setStartZone (state, startId) {
     const matchs = startId.match(/^h(\d+)_(\d+)$/)
     state.mergeTimes = parseInt(matchs[1])
     state.startIndex = parseInt(matchs[2])
-  },
-  setConfig (state, data) {
-    state.config = Object.assign(config, data)
   },
   refreshPlans (state, data) {
     data && calculatePlans(state, ...data)
@@ -76,6 +77,9 @@ const mutations = {
   setBestPlan (state, data) {
     const [planIndex, plan] = data
     state.bestPlans[planIndex] = plan[1]
+  },
+  setLastPlans (state, data) {
+    state.lastPlans = data
   }
 }
 
@@ -86,9 +90,6 @@ const actions = {
   },
   setCountryData ({ commit }, origindata) {
     commit('setCountries', origindata)
-  },
-  setConfigData ({ commit }, data) {
-    commit('setConfig', data)
   },
   refreshPlans ({ commit }, data) {
     commit('refreshPlans', data)

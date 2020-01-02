@@ -75,6 +75,7 @@ export default {
   props: [ 'planId' ],
   data () {
     return {
+      config: null,
       zoneNum: '',
       errMsg: '',
       serverIndex: '',
@@ -87,6 +88,7 @@ export default {
   },
   created: function () {
     const planArr = this.plans[this.planId]
+    this.config = JSON.parse(localStorage.getItem('merge-tool-config'))
     if (Array.isArray(planArr[0])) {
       this.startZone = planArr[1]
       this.endZone = planArr[1] + planArr[2]
@@ -211,8 +213,7 @@ export default {
     },
     ...mapGetters('merge', {
       countries: 'countries',
-      plans: 'plans',
-      config: 'config'
+      plans: 'plans'
     }),
     currntPlanSum: function () {
       if (!this.currntPlan) return []

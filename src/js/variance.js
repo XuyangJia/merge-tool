@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import config from './config'
+let config = null
 
 const mapIndexed = R.addIndex(R.map)
 
@@ -8,6 +8,10 @@ const mapIndexed = R.addIndex(R.map)
  * @param {*} countries 国家数据
  */
 function variance (plan, countries) {
+  if (!config) {
+    config = JSON.parse(localStorage.getItem('merge-tool-config'))
+  }
+
   // 1. 尖端战力
   const topPowers = getTopPowers(plan, countries)
   const activePowers = getSumByProp(plan, countries, config.Right2, ['activePowerSum']) // 计算国家潜力值 活跃战力

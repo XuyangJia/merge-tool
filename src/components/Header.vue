@@ -49,7 +49,7 @@ export default {
         return result
       })(this.bestPlans)
       const masterPlan = R.reduce(R.merge, {})(plans)
-      const blob = new Blob([JSON.stringify(masterPlan)], { type: 'text/plain;charset=utf-8' })
+      const blob = new Blob([JSON.stringify(masterPlan, null, 2)], { type: 'text/plain;charset=utf-8' })
       saveAs(blob, 'plans.json')
     }
   }
