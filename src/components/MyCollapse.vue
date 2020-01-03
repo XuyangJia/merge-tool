@@ -4,7 +4,7 @@
     <el-divider></el-divider>
     <el-row v-if="errMsg === ''" :gutter="20">
       <el-col :span="3" :offset="2">
-        <el-select v-model="planIndex">
+        <el-select v-if="showOtherPlan" v-model="planIndex">
           <el-option v-for="(item, index) in variances" :key="index" :label="`方案${index + 1} 方差：${item[0]}`" :value="index"></el-option>
         </el-select>
       </el-col>
@@ -14,7 +14,7 @@
         </div>
       </el-col>
       <el-col :span="4">
-        <el-input placeholder="请输入内容" v-model="zoneNum">
+        <el-input v-if="showOtherPlan" placeholder="请输入内容" v-model="zoneNum">
           <template slot="prepend">自定义区数量：</template>
           <el-button slot="append" icon="el-icon-s-promotion" @click="handleChange"></el-button>
         </el-input>
@@ -83,11 +83,17 @@ export default {
       variance: 0,
       varianceDIY: 0,
       currntPlan: null,
-      planIndex: -1
+      planIndex: -1,
+      items: null
     }
   },
   created: function () {
-    const planArr = this.plans[this.planId]
+    if (this.plans && this.plans.length) {
+      this.items = this.plans.slice(0, 150)
+    } else {
+      this.items = this.lastPlans
+    }
+    const planArr = this.items[this.planId]
     this.config = JSON.parse(localStorage.getItem('merge-tool-config'))
     if (Array.isArray(planArr[0])) {
       this.startZone = planArr[1]
@@ -113,6 +119,7 @@ export default {
         this.variance = plan[0]
         this.currntPlan = plan[1].concat()
         // this.currntPlan = [1, 2, 2, 1, 1, 1, 2, 2, 0, 0, 2, 0]
+        console.log('initPlanData')
         this.$store.dispatch('merge/setBestPlan', [this.planId, plan])
       }
     },
@@ -189,8 +196,11 @@ export default {
       arr.push(this.countries[this.endZone * 3 - 1])
       return arr.map(x => x.zone).join(' - ') + ' 区'
     },
+    showOtherPlan: function () {
+      return this.plans && this.plans.length
+    },
     variances: function () {
-      return this.plans[this.planId][0]
+      return this.items[this.planId][0]
     },
     countryNames: function () {
       return ['魏', '蜀', '吴']
@@ -212,7 +222,10 @@ export default {
       return result
     },
     ...mapGetters('merge', {
+      mergeTimes: 'mergeTimes',
+      startIndex: 'startIndex',
       countries: 'countries',
+      lastPlans: 'lastPlans',
       plans: 'plans'
     }),
     currntPlanSum: function () {
@@ -228,7 +241,7 @@ export default {
         keys.forEach(key => {
           result[key] = R.compose(R.sum, R.map(R.prop(key)))(arr)
         })
-        result.zone = 123
+        result.zone = `h${this.mergeTimes}_${this.startIndex + this.planId}`
         result.country = countryId
         result.countryNum = arr.length
         result.coinSum = result.activeCoin + result.extraCoin

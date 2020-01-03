@@ -63,6 +63,7 @@ const mutations = {
     if (state.lastPlans.length === 0) {
       calculatePlans(state)
     } else {
+      state.items = state.bestPlans = []
       state.calculateing = true
     }
   },
@@ -96,6 +97,9 @@ const actions = {
   },
   setBestPlan ({ commit }, data) {
     commit('setBestPlan', data)
+  },
+  setLastPlans ({ commit }, data) {
+    commit('setLastPlans', data)
   }
 }
 

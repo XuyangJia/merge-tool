@@ -15,10 +15,10 @@
           <el-divider content-position="center">选择合区段</el-divider>
           <el-form :inline="true" class="demo-form-inline">
             <el-form-item label="起始ID">
-              <el-input v-model="startId" placeholder="Start ID"></el-input>
+              <el-input v-model="startId" clearable placeholder="Start ID"></el-input>
             </el-form-item>
             <el-form-item label="结束ID">
-              <el-input v-model="endId" placeholder="End ID"></el-input>
+              <el-input v-model="endId" clearable placeholder="End ID"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="onSubmit">提交</el-button>
@@ -59,7 +59,6 @@ export default {
   data: function () {
     return {
       notRequest: true,
-      serverIndex: 0,
       serverOptions: [
         { name: '三国 简体', value: 'http://sg3.ptkill.com', dev: '/sg3' },
         { name: '三国 360', value: 'http://qh.ptkill.com', dev: '/qh' },
@@ -69,9 +68,9 @@ export default {
         { name: '警戒 简体', value: 'http://war.ptkill.com' },
         { name: '警戒 37', value: 'http://war37.ptkill.com' }
       ],
-      steps: null,
-      startId: '',
-      endId: '',
+      serverIndex: 1,
+      startId: '11001',
+      endId: '11004',
       loading: false,
       inputData: null
     }
@@ -88,6 +87,7 @@ export default {
       const start = parseInt(this.startId.match(reg)[2])
       const end = parseInt(this.endId.match(reg)[2])
       const zones = Array.from({ length: end - start + 1 }, (_, i) => `${prefix}${start + i}`)
+      this.$store.dispatch('merge/setLastPlans', [])
       this.getCountryData(zones)
     },
     getCountryData (zones) {
@@ -187,8 +187,20 @@ export default {
         }
       })
       const newZones = Object.keys(newPlanObj).sort()
-      const lastPlans = newZones.map(newZone => newPlanObj[newZone])
-      this.$store.dispatch('merge/setStartZone', newZones[0])
+      const plans = newZones.map(newZone => newPlanObj[newZone])
+      let startIndex = 0
+      let lastPlans = []
+      plans.forEach(arr => {
+        const zoneNum = arr.length / 3
+        lastPlans.push([
+          [[0, arr]],
+          startIndex,
+          zoneNum
+        ])
+        startIndex += zoneNum
+      })
+      this.$store.dispatch('merge/setLastPlans', lastPlans)
+      this.getCountryData(zones)
       console.log(zones, planObj, lastPlans)
     }
   }

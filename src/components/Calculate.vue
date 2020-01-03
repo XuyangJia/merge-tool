@@ -12,7 +12,11 @@ export default {
   },
   mounted () {
     const { data } = this.$route.params
-    this.$store.dispatch('merge/refreshPlans', data)
+    if (this.lastPlans && this.lastPlans.length) {
+      // console.log(this.lastPlans)
+    } else {
+      this.$store.dispatch('merge/refreshPlans', data)
+    }
   },
   watch: {
     calculateing: {
@@ -24,7 +28,8 @@ export default {
   },
   computed: {
     ...mapGetters('merge', {
-      calculateing: 'calculateing'
+      calculateing: 'calculateing',
+      lastPlans: 'lastPlans'
     })
   }
 }

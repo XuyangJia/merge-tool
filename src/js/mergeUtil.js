@@ -25,6 +25,7 @@ let minPay = 0
 let cursor = 0
 let zoneNum = 0
 let ratio = 0
+let filterSwitch = true
 const filed = (status, msg) => ({ status, msg })
 
 function sendMsg (msg) {
@@ -58,16 +59,16 @@ function getSingleMergePlan (data) {
 function allocateTop3 (top3) {
   const result = []
   const countrys = R.map(R.prop('country'))(top3)
-  result[countrys[0]] = 0
+  result[0] = countrys[0]
   if (countrys[1] !== countrys[0]) {
-    result[countrys[1]] = 1
-    result[3 - countrys[0] - countrys[1]] = 2
-  } else if (countrys[1] !== countrys[0]) {
-    result[countrys[2]] = 2
-    result[3 - countrys[0] - countrys[2]] = 1
+    result[1] = countrys[1]
+    result[2] = 3 - countrys[0] - countrys[1]
+  } else if (countrys[2] !== countrys[0]) {
+    result[2] = countrys[2]
+    result[1] = 3 - countrys[0] - countrys[2]
   } else {
-    result[(countrys[0] + 1) % 3] = 1
-    result[(countrys[0] + 2) % 3] = 2
+    result[1] = (countrys[0] + 1) % 3
+    result[2] = (countrys[0] + 2) % 3
   }
   return result
 }
@@ -78,9 +79,9 @@ function calculate (data) {
   const temp = sortWithPower(data.concat()) // 按照尖端战力排序后取前三
   const top3 = R.take(3)(temp)
   const base = Array(temp.length).fill(-1)
-  allocateTop3(top3).map(i => {
-    const index = data.indexOf(temp[i])
-    base[index] = i
+  allocateTop3(top3).map((id, i) => {
+    const index = data.indexOf(top3[i])
+    base[index] = id
   })
 
   Crights = R.map(getCright)(data)
@@ -146,7 +147,10 @@ function testMerge (countries) {
 function getAllMergePlan (countries, plans) {
   tempVariances = [] // 清空临时记录
   zoneNum = 1
-  const plan = testMerge(countries)
+  let plan = testMerge(countries)
+  if (Array.isArray(plan)) {
+    plan = plan.slice(0, 200)
+  }
   plans.push([plan, cursor, zoneNum])
   if (Array.isArray(plan)) {
     cursor += zoneNum
@@ -166,18 +170,23 @@ function getAllPlans (base) {
   }
 
   let result = [base]
+  filterSwitch = true
   for (let i = 0, len = base.length; i < len; ++i) {
     if (result[0][i] === -1) {
       let tempResult = []
       for (let j = 0, len2 = result.length; j < len2; ++j) {
         const arr = R.map(item => cover(item, i, result[j]))([0, 1, 2])
         tempResult = tempResult.concat(arr.filter(feasibility))
+        if (tempResult.length === 0) {
+          filterSwitch = false
+          tempResult = tempResult.concat(arr)
+        }
       }
-      if (tempResult.length === 0) return []
       result = tempResult
     }
   }
-  return R.filter(workable)(result)
+  const workableResult = R.filter(workable)(result)
+  return workableResult.length ? workableResult : result
 }
 
 function feasibility (arr) {
@@ -191,6 +200,7 @@ function feasibility (arr) {
 }
 
 function feasibilityWithCounrey (arr) {
+  if (zoneNum <= 3 || filterSwitch === false) return true
   return (R.compose(R.sum, R.map(i => Crights[i]))(arr) < criticalCright &&
   R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) < criticalPowerfulNum &&
   R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) < criticalActiveNum &&
@@ -210,6 +220,7 @@ function workable (arr) {
 }
 
 function workableWithCounrey (arr) {
+  if (zoneNum <= 3 || filterSwitch === false) return true
   return (R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) > minPowerfulNum &&
   R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) > minActiveNum &&
   R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) > minActivePowerSum &&
