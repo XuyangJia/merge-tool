@@ -52,8 +52,7 @@
       show-summary
       size="mini"
       fit
-      border
-      stripe>
+      border>
       <el-table-column
         v-for="(item, index) in options2"
         :key="index"
@@ -84,6 +83,8 @@ export default {
       varianceDIY: 0,
       currntPlan: null,
       planIndex: -1,
+      countryData: null,
+      top3Index: null,
       items: null
     }
   },
@@ -99,6 +100,10 @@ export default {
       this.startZone = planArr[1]
       this.endZone = planArr[1] + planArr[2]
       this.planIndex = 0
+      this.countryData = this.countries.slice(this.startZone * 3, this.endZone * 3)
+      const sortWithPower = R.sortWith([R.descend(R.prop('top1'))])
+      const top3 = R.compose(R.take(3), sortWithPower)(this.countryData.concat())
+      this.top3Index = R.map(x => this.countryData.indexOf(x))(top3)
     } else {
       this.errMsg = planArr[0].msg
     }
@@ -126,9 +131,12 @@ export default {
       return this.config.titles[key]
     },
     setCellStyle ({ column, rowIndex }) {
-      const arr = this.countries.slice(this.startZone * 3)
+      const arr = this.countryData
+      const topIndex = this.top3Index.indexOf(rowIndex)
       if (arr && arr[rowIndex] && column && column.property === 'country') {
         return { color: ['#409EFF', '#67C23A', '#F56C6C'][arr[rowIndex].country] }
+      } else if (arr && arr[rowIndex] && column && column.property === 'top1' && topIndex >= 0) {
+        return { 'background-color': ['#000000', '#606266', '#909399'][topIndex], color: '#fff' }
       }
     },
     setCellStyle2 ({ column, rowIndex }) {
@@ -137,7 +145,7 @@ export default {
       }
     },
     dataFormat (row, column, cellValue, index, sum = false) {
-      const arr = sum ? this.currntPlanSum : this.countries.slice(this.startZone * 3)
+      const arr = sum ? this.currntPlanSum : this.countryData
       const obj = arr[index]
       if (!obj) return ''
       let content = ''
@@ -158,8 +166,7 @@ export default {
       return this.dataFormat(...arguments, true)
     },
     refresh () {
-      const countryData = this.countries.slice(this.startZone * 3, this.endZone * 3)
-      this.varianceDIY = variance(this.currntPlan, countryData)
+      this.varianceDIY = variance(this.currntPlan, this.countryData)
       this.$store.dispatch('merge/setBestPlan', [this.planId, [this.varianceDIY, this.currntPlan]])
     },
     handleChange () {
@@ -232,9 +239,8 @@ export default {
       if (!this.currntPlan) return []
       const keys = R.without(['coinSum'], this.options2)
       const diff = (a, b) => { return a - b }
-      const countryData = this.countries.slice(this.startZone * 3, this.endZone * 3)
       return [0, 1, 2].map(countryId => {
-        const arr = countryData.filter((item, index) => {
+        const arr = this.countryData.filter((item, index) => {
           return this.currntPlan[index] === countryId
         }, this)
         const result = {}

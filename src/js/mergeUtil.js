@@ -74,7 +74,7 @@ function allocateTop3 (top3) {
 }
 
 function calculate (data) {
-  const sortWithPower = R.sortWith([R.descend(R.prop('topPower'))])
+  const sortWithPower = R.sortWith([R.descend(R.prop('top1'))])
   tempData = data
   const temp = sortWithPower(data.concat()) // 按照尖端战力排序后取前三
   const top3 = R.take(3)(temp)

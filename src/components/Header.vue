@@ -1,14 +1,29 @@
 <template>
-  <el-row class="header">
-    <el-col :span="2">
-      <el-button type="warning" @click="backToHome"><i class="el-icon-s-home el-icon--left">主页</i></el-button>
-    </el-col>
-    <el-col :span="20">
-    </el-col>
-    <el-col :span="2">
-      <el-button type="success" @click="exportPlans">导出<i class="el-icon-download el-icon--right"></i></el-button>
-    </el-col>
-  </el-row>
+  <div>
+    <el-row class="header">
+      <el-col :span="2">
+        <el-button type="warning" @click="backToHome"><i class="el-icon-s-home el-icon--left">主页</i></el-button>
+      </el-col>
+      <el-col :span="18">
+      </el-col>
+      <el-col :span="2">
+        <el-button type="info" @click="openDialog">影响的区<i class="el-icon-search el-icon--right"></i></el-button>
+      </el-col>
+      <el-col :span="2">
+        <el-button type="success" @click="exportPlans">导出<i class="el-icon-download el-icon--right"></i></el-button>
+      </el-col>
+    </el-row>
+    <el-dialog
+      title="受影响的区"
+      :visible.sync="dialogVisible"
+      width="50%">
+      <el-input
+        type="textarea"
+        :autosize="{ minRows: 10, maxRows: 40}"
+        :value="content">
+      </el-input>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
@@ -17,7 +32,10 @@ import { mapGetters } from 'vuex'
 import { saveAs } from 'file-saver'
 export default {
   data: function () {
-    return {}
+    return {
+      dialogVisible: false,
+      content: ''
+    }
   },
   computed: {
     ...mapGetters('merge', {
@@ -31,7 +49,14 @@ export default {
     backToHome: function () {
       this.$router.push('/')
     },
-    exportPlans: function () {
+    openDialog: function () {
+      this.dialogVisible = true
+      const planData = R.map(R.prop('to_zone'))(this.getExportPlans())
+      const oriZones = R.keys(planData).sort()
+      const mergeZones = [...new Set(R.values(planData))].sort()
+      this.content = [oriZones.join(), mergeZones.join()].join('\n')
+    },
+    getExportPlans: function () {
       const mapIndexed = R.addIndex(R.map)
       const getZone = index => `h${this.mergeTimes}_${this.startIndex + index}`
       let cursor = 0 // 计算进度
@@ -48,8 +73,10 @@ export default {
         cursor += plan.length // 移动游标
         return result
       })(this.bestPlans)
-      const masterPlan = R.reduce(R.merge, {})(plans)
-      const blob = new Blob([JSON.stringify(masterPlan, null, 2)], { type: 'text/plain;charset=utf-8' })
+      return R.reduce(R.merge, {})(plans)
+    },
+    exportPlans: function () {
+      const blob = new Blob([JSON.stringify(this.getExportPlans(), null, 2)], { type: 'text/plain;charset=utf-8' })
       saveAs(blob, 'plans.json')
     }
   }
