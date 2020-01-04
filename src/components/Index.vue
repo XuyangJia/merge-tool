@@ -68,9 +68,9 @@ export default {
         { name: '警戒 简体', value: 'http://war.ptkill.com' },
         { name: '警戒 37', value: 'http://war37.ptkill.com' }
       ],
-      serverIndex: 1,
-      startId: '11001',
-      endId: '11004',
+      serverIndex: 0,
+      startId: '263',
+      endId: '270',
       loading: false,
       inputData: null
     }
@@ -111,7 +111,7 @@ export default {
         }
         this.$store.dispatch('merge/setStartZone', startZone)
         this.$store.dispatch('merge/setCountryData', origindata)
-        this.$router.push({ name: 'Calculate' })
+        this.$router.push('merge')
       }).catch(console.error)
     },
     handleDrop (e) {

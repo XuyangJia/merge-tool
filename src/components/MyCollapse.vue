@@ -119,7 +119,6 @@ export default {
         this.variance = plan[0]
         this.currntPlan = plan[1].concat()
         // this.currntPlan = [1, 2, 2, 1, 1, 1, 2, 2, 0, 0, 2, 0]
-        console.log('initPlanData')
         this.$store.dispatch('merge/setBestPlan', [this.planId, plan])
       }
     },
@@ -164,7 +163,7 @@ export default {
       this.$store.dispatch('merge/setBestPlan', [this.planId, [this.varianceDIY, this.currntPlan]])
     },
     handleChange () {
-      const num = +this.zoneNum.match(/\d+/)[0]
+      const num = +this.zoneNum
       if (!Number.isInteger(num) || num < 2 || num > 6) {
         this.$message({
           message: '数据格式错误，要求输入2-6之间的数字',
@@ -182,7 +181,8 @@ export default {
             type: 'warning'
           })
         } else {
-          this.$router.push({ path: 'calculate', params: { data: [this.planId, num] } })
+          this.$message.info(`区数量${num} 重新计算`)
+          this.$emit('reMerge', [this.planId, num])
         }
       }
     }

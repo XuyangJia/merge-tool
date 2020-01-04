@@ -7,7 +7,6 @@ const state = {
   mergeTimes: 0, // 拿到的这些国家的当前合服次数
   startIndex: 0, // 起始位置
   countries: [],
-  calculateing: false,
   items: [],
   lastPlans: [],
   bestPlans: []
@@ -18,7 +17,6 @@ const getters = {
   mergeTimes: state => state.mergeTimes,
   startIndex: state => state.startIndex,
   countries: state => state.countries,
-  calculateing: state => state.calculateing,
   plans: state => state.items,
   lastPlans: state => state.lastPlans,
   bestPlans: state => state.bestPlans
@@ -26,7 +24,6 @@ const getters = {
 
 function calculatePlans (state, planIndex, zoneNum) {
   let plans = null
-  state.calculateing = false
   if (zoneNum) {
     const currentPlan = state.items[planIndex]
     plans = state.items.slice(0, planIndex)
@@ -45,7 +42,6 @@ function calculatePlans (state, planIndex, zoneNum) {
     plans = getMergePlans(state.countries)
   }
   state.items = Object.freeze(plans)
-  state.calculateing = true
 }
 
 // mutations
@@ -64,7 +60,6 @@ const mutations = {
       calculatePlans(state)
     } else {
       state.items = state.bestPlans = []
-      state.calculateing = true
     }
   },
   setStartZone (state, startId) {
