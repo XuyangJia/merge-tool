@@ -32,7 +32,7 @@ function sendMsg (msg) {
   console.log(msg)
 }
 
-function getSingleMergePlan (data) {
+function getSingleMergePlan (data, force) {
   if (!config) {
     config = JSON.parse(localStorage.getItem('merge-tool-config'))
   }
@@ -48,7 +48,7 @@ function getSingleMergePlan (data) {
     return filed(STATUS_ZONE_SHORT, `区数量不足${zonesStr}`)
   } else if (sum < minNum) {
     return filed(STATUS_NOT_ENOUGH, `人数不足: ${sum} < ${minNum}${zonesStr}`)
-  } else if (sum > maxNum) {
+  } else if (sum > maxNum && force === false) {
     return filed(STATUS_TOO_MUCH, `人数过多: ${sum} > ${maxNum}${zonesStr}`)
   } else {
     sendMsg(`尝试${zonesStr} 共计${num}个区进行合并，当前总人数${sum}`)
@@ -240,7 +240,7 @@ export function getMergePlans (countries, progress, single) {
   countries = countries.concat()
   if (single) {
     tempVariances = []
-    const plan = getSingleMergePlan(countries)
+    const plan = getSingleMergePlan(countries, true)
     return tempVariances[0] || plan
   }
   return getAllMergePlan(countries, [])

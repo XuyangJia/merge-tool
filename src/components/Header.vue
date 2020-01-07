@@ -76,7 +76,7 @@ export default {
       return R.reduce(R.merge, {})(plans)
     },
     exportPlans: function () {
-      const blob = new Blob([JSON.stringify(this.getExportPlans(), null, 2)], { type: 'text/plain;charset=utf-8' })
+      const blob = new Blob([JSON.stringify(this.getExportPlans())], { type: 'text/plain;charset=utf-8' })
       saveAs(blob, 'plans.json')
     }
   }
