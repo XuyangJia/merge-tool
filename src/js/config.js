@@ -23,15 +23,6 @@ export default {
     [230, 0.55],
     [240, 0.5]
   ],
-  Cright: {
-    Cright1: 100,
-    Cright2: 100,
-    Cright3: 50,
-    Cright4: 100,
-    Cright5: 80,
-    Cright6: 60,
-    ratio: 1.5 / 3
-  },
   reward: [
     { coin: 500, item036: 5 },
     { coin: 200, item036: 10 }

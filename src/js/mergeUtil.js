@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import { getPlans } from './planFinder'
 import { variance } from './variance'
 let config = null
 
@@ -7,25 +8,12 @@ const STATUS_NOT_ENOUGH = 1
 const STATUS_TOO_MUCH = 2
 const STATUS_NOT_EXIST = 3
 
-const mapIndexed = R.addIndex(R.map)
+// const mapIndexed = R.addIndex(R.map)
 
 let tempVariances = null
 let tempData = null
-let Crights = null
-let criticalCright = 0
-let criticalPowerfulNum = 0
-let criticalActiveNum = 0
-let criticalTopPower = 0
-let criticalActivePowerSum = 0
-let criticalPay = 0
-let minPowerfulNum = 0
-let minActiveNum = 0
-let minActivePowerSum = 0
-let minPay = 0
 let cursor = 0
 let zoneNum = 0
-let ratio = 0
-let filterSwitch = true
 const filed = (status, msg) => ({ status, msg })
 
 function sendMsg (msg) {
@@ -38,7 +26,6 @@ function getSingleMergePlan (data, force) {
   }
   const minNum = config.numRight[0][0]
   const maxNum = config.maxNum
-  ratio = config.Cright.ratio
 
   const num = data.length / 3
   const sum = countPlayers(data)
@@ -56,49 +43,9 @@ function getSingleMergePlan (data, force) {
   }
 }
 
-function allocateTop3 (top3) {
-  const result = []
-  const countrys = R.map(R.prop('country'))(top3)
-  result[0] = countrys[0]
-  if (countrys[1] !== countrys[0]) {
-    result[1] = countrys[1]
-    result[2] = 3 - countrys[0] - countrys[1]
-  } else if (countrys[2] !== countrys[0]) {
-    result[2] = countrys[2]
-    result[1] = 3 - countrys[0] - countrys[2]
-  } else {
-    result[1] = (countrys[0] + 1) % 3
-    result[2] = (countrys[0] + 2) % 3
-  }
-  return result
-}
-
 function calculate (data) {
-  const sortWithPower = R.sortWith([R.descend(R.prop('top1'))])
-  tempData = data
-  const temp = sortWithPower(data.concat()) // 按照尖端战力排序后取前三
-  const top3 = R.take(3)(temp)
-  const base = Array(temp.length).fill(-1)
-  allocateTop3(top3).map((id, i) => {
-    const index = data.indexOf(top3[i])
-    base[index] = id
-  })
-
-  Crights = R.map(getCright)(data)
-  criticalCright = Math.floor(R.sum(Crights) * ratio)
-  criticalPowerfulNum = Math.floor(R.compose(R.sum, R.map(x => x.powerfulNum))(tempData) * ratio)
-  criticalActiveNum = Math.floor(R.compose(R.sum, R.map(x => x.activeNum))(tempData) * ratio)
-  criticalTopPower = Math.floor(R.compose(R.sum, R.map(x => x.topPower))(tempData) * ratio)
-  criticalActivePowerSum = Math.floor(R.compose(R.sum, R.map(x => x.activePowerSum))(tempData) * ratio)
-  criticalPay = Math.floor(R.compose(R.sum, R.map(x => (x.activePay + x.activePayFake)))(tempData) * ratio)
-  minPowerfulNum = Math.floor(R.compose(R.sum, R.map(x => x.powerfulNum))(tempData) / 6)
-  minActiveNum = Math.floor(R.compose(R.sum, R.map(x => x.activeNum))(tempData) / 5)
-  minActivePowerSum = Math.floor(R.compose(R.sum, R.map(x => x.activePowerSum))(tempData) / 4)
-  minPay = Math.floor(R.compose(R.sum, R.map(x => (x.activePay + x.activePayFake)))(tempData) / 5)
-
   // 列出所有方案
-  const plans = getAllPlans(base)
-  sendMsg(`方案数量：${plans.length}`)
+  const plans = getPlans(data)
 
   const variances = R.map(plan => variance(plan, tempData), plans)
   const exist = R.any(R.flip(R.lte)(config.idealS), variances)
@@ -160,79 +107,6 @@ function getAllMergePlan (countries, plans) {
     }
   }
   return plans
-}
-
-function getAllPlans (base) {
-  function cover (item, pos, array) {
-    const result = R.clone(array)
-    result[pos] = item
-    return result
-  }
-
-  let result = [base]
-  filterSwitch = true
-  for (let i = 0, len = base.length; i < len; ++i) {
-    if (result[0][i] === -1) {
-      let tempResult = []
-      for (let j = 0, len2 = result.length; j < len2; ++j) {
-        const arr = R.map(item => cover(item, i, result[j]))([0, 1, 2])
-        tempResult = tempResult.concat(arr.filter(feasibility))
-        if (tempResult.length === 0) {
-          filterSwitch = false
-          tempResult = tempResult.concat(arr)
-        }
-      }
-      result = tempResult
-    }
-  }
-  const workableResult = R.filter(workable)(result)
-  return workableResult.length ? workableResult : result
-}
-
-function feasibility (arr) {
-  return R.all(id => {
-    const arr2 = []
-    mapIndexed((val, idx) => {
-      val === id && arr2.push(idx)
-    })(arr)
-    return feasibilityWithCounrey(arr2)
-  })([0, 1, 2])
-}
-
-function feasibilityWithCounrey (arr) {
-  if (zoneNum <= 3 || filterSwitch === false) return true
-  return (R.compose(R.sum, R.map(i => Crights[i]))(arr) < criticalCright &&
-  R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) < criticalPowerfulNum &&
-  R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) < criticalActiveNum &&
-  R.compose(R.sum, R.map(i => tempData[i].topPower))(arr) < criticalTopPower &&
-  R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) < criticalActivePowerSum &&
-  R.compose(R.sum, R.map(i => (tempData[i].activePay + tempData[i].activePayFake)))(arr) < criticalPay)
-}
-
-function workable (arr) {
-  return R.all(id => {
-    const arr2 = []
-    mapIndexed((val, idx) => {
-      val === id && arr2.push(idx)
-    })(arr)
-    return workableWithCounrey(arr2)
-  })([0, 1, 2])
-}
-
-function workableWithCounrey (arr) {
-  if (zoneNum <= 3 || filterSwitch === false) return true
-  return (R.compose(R.sum, R.map(i => tempData[i].powerfulNum))(arr) > minPowerfulNum &&
-  R.compose(R.sum, R.map(i => tempData[i].activeNum))(arr) > minActiveNum &&
-  R.compose(R.sum, R.map(i => tempData[i].activePowerSum))(arr) > minActivePowerSum &&
-  R.compose(R.sum, R.map(i => (tempData[i].activePay + tempData[i].activePayFake)))(arr) > minPay)
-}
-
-export function getCright (x) {
-  if (!config) {
-    config = JSON.parse(localStorage.getItem('merge-tool-config'))
-  }
-  const { Cright1, Cright2, Cright3, Cright4, Cright5, Cright6 } = config.Cright
-  return Cright1 * x.topPower + Cright2 * x.activePowerSum + Cright3 * (x.activePay + x.activePayFake) + Cright4 * x.activePay30 + Cright5 * x.powerfulNum + Cright6 * x.activeNum
 }
 
 export function getMergePlans (countries, progress, single) {
