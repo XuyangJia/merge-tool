@@ -8,10 +8,7 @@ const STATUS_NOT_ENOUGH = 1
 const STATUS_TOO_MUCH = 2
 const STATUS_NOT_EXIST = 3
 
-// const mapIndexed = R.addIndex(R.map)
-
 let tempVariances = null
-let tempData = null
 let cursor = 0
 let zoneNum = 0
 const filed = (status, msg) => ({ status, msg })
@@ -47,7 +44,7 @@ function calculate (data) {
   // 列出所有方案
   const plans = getPlans(data)
 
-  const variances = R.map(plan => variance(plan, tempData), plans)
+  const variances = R.map(plan => variance(plan, data), plans)
   const exist = R.any(R.flip(R.lte)(config.idealS), variances)
   const result = R.sortBy(R.prop('0'), R.zip(variances, plans))
   if (exist) {

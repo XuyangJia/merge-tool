@@ -7,6 +7,9 @@ export default {
   Right6: 50,
   idealS: 500, // 理想比较方差
   maxNum: 250, // 人数上限
+  queryTimes: 100, // 查找次数
+  busyRatio: 1.005, // 幂系数
+  freeRatio: 1.02, // 未分标力系数
   numRight: [
     [110, 0.6], // 人数下限
     [120, 0.7],

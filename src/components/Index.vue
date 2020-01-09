@@ -51,7 +51,6 @@
 
 <script>
 import JsonEditor from './JsonEditor.vue'
-import { getCright } from '../js/mergeUtil'
 export default {
   components: {
     JsonEditor
@@ -101,7 +100,6 @@ export default {
           config.keys.forEach((key, i) => {
             result[key] = item[i]
           })
-          result.right = getCright(result)
           return result
         })
         let startZone = response.data.start_zone

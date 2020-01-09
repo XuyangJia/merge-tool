@@ -26,7 +26,11 @@ export default {
   },
   created: function () {
     const configStr = localStorage.getItem(storageKey)
-    const localConfig = configStr ? JSON.parse(localStorage.getItem(storageKey)) : config
+    console.log(config)
+    let localConfig = configStr ? JSON.parse(localStorage.getItem(storageKey)) : config
+    localConfig = Object.assign({}, ...[config, localConfig])
+    localConfig = R.pick(Object.keys(config))(localConfig)
+    console.log(localConfig)
     this.jsonData = R.compose(R.clone, R.omit(['titles', 'keys']))(localConfig)
     localStorage.setItem(storageKey, JSON.stringify(Object.assign(config, localConfig)))
   },
@@ -45,7 +49,10 @@ export default {
   | 玩家数(高战+中坚)  | Right5 默认值 60                 |
   | 活跃coin          | Right6 默认值 50                 |
   | 期望方差          | idealS 默认值 500                |
-  | 最大人数          | maxNum 默认值 250                 |`
+  | 最大人数          | maxNum 默认值 250                 |
+  | 查找次数          | queryTimes 默认值 100             |
+  | 幂系数            | busyRatio 默认值 1.005            |
+  | 未分配标力系数    | freeRatio 默认值 1.02             |`
       return marked(noteStr)
     }
   },

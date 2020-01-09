@@ -171,9 +171,9 @@ export default {
     },
     handleChange () {
       const num = +this.zoneNum
-      if (!Number.isInteger(num) || num < 2 || num > 6) {
+      if (!Number.isInteger(num) || num < 2) {
         this.$message({
-          message: '数据格式错误，要求输入2-6之间的数字',
+          message: '数据格式错误，要求至少是2个区',
           type: 'warning'
         })
       } else {
