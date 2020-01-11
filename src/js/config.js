@@ -36,8 +36,8 @@ export default {
     country: '国家',
     capitalNum: '都城数',
     cityNum: '城池总数',
-    powerfulNum: '活跃高战玩家数',
-    activeNum: '活跃中坚玩家数',
+    powerfulNum: '活跃高战',
+    activeNum: '活跃中坚',
     rankScore: '排名积分',
     topPower: '活跃尖端战力',
     activePowerSum: '活跃总战力',
@@ -51,7 +51,8 @@ export default {
     target: '目标国家',
     countryNum: '原国家数',
     extraCoin: '补偿coin',
-    coinSum: '总coin'
+    coinSum: '总coin',
+    potentialS: '标准化潜力'
   },
   keys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay30', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'top20', 'top1']
 }

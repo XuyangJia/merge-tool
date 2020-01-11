@@ -26,11 +26,11 @@ export default {
   },
   created: function () {
     const configStr = localStorage.getItem(storageKey)
-    console.log(config)
-    let localConfig = configStr ? JSON.parse(localStorage.getItem(storageKey)) : config
+    let localConfig = configStr ? JSON.parse(localStorage.getItem(storageKey)) : {}
+    delete localConfig.titles
+    delete localConfig.keys
     localConfig = Object.assign({}, ...[config, localConfig])
     localConfig = R.pick(Object.keys(config))(localConfig)
-    console.log(localConfig)
     this.jsonData = R.compose(R.clone, R.omit(['titles', 'keys']))(localConfig)
     localStorage.setItem(storageKey, JSON.stringify(Object.assign(config, localConfig)))
   },

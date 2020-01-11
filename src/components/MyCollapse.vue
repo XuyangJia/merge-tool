@@ -101,7 +101,7 @@ export default {
       this.endZone = planArr[1] + planArr[2]
       this.planIndex = 0
       this.countryData = this.countries.slice(this.startZone * 3, this.endZone * 3)
-      const sortWithPower = R.sortWith([R.descend(R.prop('top1'))])
+      const sortWithPower = R.sortWith([R.descend(R.prop('potentialS'))])
       const top3 = R.compose(R.take(3), sortWithPower)(this.countryData.concat())
       this.top3Index = R.map(x => this.countryData.indexOf(x))(top3)
     } else {
@@ -135,7 +135,7 @@ export default {
       const topIndex = this.top3Index.indexOf(rowIndex)
       if (arr && arr[rowIndex] && column && column.property === 'country') {
         return { color: ['#409EFF', '#67C23A', '#F56C6C'][arr[rowIndex].country] }
-      } else if (arr && arr[rowIndex] && column && column.property === 'top1' && topIndex >= 0) {
+      } else if (arr && arr[rowIndex] && column && column.property === 'potentialS' && topIndex >= 0) {
         return { 'background-color': ['#000000', '#606266', '#909399'][topIndex], color: '#fff' }
       }
     },
@@ -213,7 +213,7 @@ export default {
       return ['魏', '蜀', '吴']
     },
     options: function () {
-      const result = this.config.keys.concat()
+      const result = this.config.keys.concat('potentialS')
       let index = result.indexOf('activeCoin')
       result.splice(index + 1, 0, 'extraCoin')
       index = result.indexOf('country')

@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-row v-if="notRequest" :gutter="20">
-      <el-col :span="8" :offset="2">
+    <el-row v-if="notRequest">
+      <el-col :span="10" :offset="1">
         <JsonEditor/>
       </el-col>
-      <el-col :span="14">
+      <el-col :span="12" :offset="1">
         <div class="input-container">
           <el-divider content-position="center">选择服务器</el-divider>
           <el-form :inline="true" class="demo-form-inline">
@@ -68,8 +68,8 @@ export default {
         { name: '警戒 37', value: 'http://war37.ptkill.com' }
       ],
       serverIndex: 0,
-      startId: '251',
-      endId: '259',
+      startId: '5701',
+      endId: '5703',
       loading: false,
       inputData: null
     }

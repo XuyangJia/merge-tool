@@ -70,6 +70,9 @@ function getPlans (countries) {
   goal = Math.round(R.compose(R.sum, R.map(R.prop('potentialS')))(dataSorted) / 3)
   const top3 = dataSorted.slice(0, 3)
   const top6 = allocateTop6(top3)
+  R.forEach(R.compose(console.log, R.prop('potentialS')))(dataSorted)
+  console.log('---------------------------------------------------------------')
+  R.forEach(R.compose(console.log, R.prop('potentialS')))(countries)
   if (countries.length <= 6) {
     return changeOrder(top6)
   } else {
@@ -100,7 +103,6 @@ function changeOrder (plans) {
 function search (top6) {
   const planList = []
   const searchingList = []
-
   function findPlan (arr) {
     while (arr.length < countriesSorted.length) {
       const result = R.map(id => {
