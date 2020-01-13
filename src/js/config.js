@@ -50,7 +50,6 @@ export default {
     top1: '单将最高战力',
     target: '目标国家',
     countryNum: '原国家数',
-    extraCoin: '补偿coin',
     coinSum: '总coin',
     potentialS: '标准化潜力'
   },

@@ -68,8 +68,8 @@ export default {
         { name: '警戒 37', value: 'http://war37.ptkill.com' }
       ],
       serverIndex: 0,
-      startId: '5701',
-      endId: '5703',
+      startId: '5660',
+      endId: '5701',
       loading: false,
       inputData: null
     }

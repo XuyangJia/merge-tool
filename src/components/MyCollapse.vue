@@ -215,7 +215,6 @@ export default {
     options: function () {
       const result = this.config.keys.concat('potentialS')
       let index = result.indexOf('activeCoin')
-      result.splice(index + 1, 0, 'extraCoin')
       index = result.indexOf('country')
       result.splice(index + 1, 0, 'target')
       return result
@@ -224,8 +223,6 @@ export default {
       const result = R.without(['days', 'target', 'rankScore', 'capitalNum', 'cityNum', 'top20'], this.options)
       let index = result.indexOf('country')
       result.splice(index + 1, 0, 'countryNum')
-      index = result.indexOf('extraCoin')
-      result.splice(index + 1, 0, 'coinSum')
       return result
     },
     ...mapGetters('merge', {
@@ -237,7 +234,7 @@ export default {
     }),
     currntPlanSum: function () {
       if (!this.currntPlan) return []
-      const keys = R.without(['coinSum'], this.options2)
+      const keys = this.options2
       const diff = (a, b) => { return a - b }
       return [0, 1, 2].map(countryId => {
         const arr = this.countryData.filter((item, index) => {
@@ -250,7 +247,6 @@ export default {
         result.zone = `h${this.mergeTimes}_${this.startIndex + this.planId}`
         result.country = countryId
         result.countryNum = arr.length
-        result.coinSum = result.activeCoin + result.extraCoin
         result.top1 = R.compose(R.nth(-1), R.sort(diff), R.map(R.prop('top1')))(arr)
         return result
       }, this)

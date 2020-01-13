@@ -65,10 +65,14 @@ export default {
         const result = {}
         const toZone = getZone(index)
         let countryArr = this.countries.slice(cursor, cursor + plan.length)
+        const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countryArr)
+        const config = JSON.parse(localStorage.getItem('merge-tool-config'))
+        const rewardCfg = config.reward[this.mergeTimes - 1]
+        const equalizeDay = maxDay + (1000 / rewardCfg.coin)
         mapIndexed((country, i) => {
           const data = countryArr[i]
           const zone = data.zone
-          result[zone] || (result[zone] = { to_zone: toZone, reward: data.reward, country: [] })
+          result[zone] || (result[zone] = { to_zone: toZone, reward: R.map(y => y * (equalizeDay - data.days))(rewardCfg), country: [] })
           result[zone].country[data.country] = country
         })(plan)
         cursor += plan.length // 移动游标

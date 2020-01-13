@@ -1,5 +1,4 @@
 
-import * as R from 'ramda'
 import { getMergePlans } from '../../js/mergeUtil'
 
 // initial state
@@ -47,15 +46,7 @@ function calculatePlans (state, planIndex, zoneNum) {
 // mutations
 const mutations = {
   setCountries (state, countries) {
-    const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countries)
-    state.countries = Object.freeze(R.map(obj => {
-      const config = JSON.parse(localStorage.getItem('merge-tool-config'))
-      const rewardCfg = config.reward[state.mergeTimes - 1]
-      const equalizeDay = maxDay + (1000 / rewardCfg.coin)
-      obj.reward = R.map(y => y * (equalizeDay - obj.days))(rewardCfg)
-      obj.extraCoin = obj.reward.coin
-      return obj
-    })(countries))
+    state.countries = Object.freeze(countries)
     if (state.lastPlans.length === 0) {
       calculatePlans(state)
     } else {
