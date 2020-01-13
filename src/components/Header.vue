@@ -54,7 +54,8 @@ export default {
       const planData = R.map(R.prop('to_zone'))(this.getExportPlans())
       const oriZones = R.keys(planData).sort()
       const mergeZones = [...new Set(R.values(planData))].sort()
-      this.content = [oriZones.join(), mergeZones.join()].join('\n')
+      const str = JSON.stringify(oriZones.concat(mergeZones))
+      this.content = str.substring(1, str.length - 1)
     },
     getExportPlans: function () {
       const mapIndexed = R.addIndex(R.map)
@@ -76,7 +77,15 @@ export default {
       return R.reduce(R.merge, {})(plans)
     },
     exportPlans: function () {
-      const blob = new Blob([JSON.stringify(this.getExportPlans())], { type: 'text/plain;charset=utf-8' })
+      const data = this.getExportPlans()
+      const keys = Object.keys(data)
+      const obj = {}
+      R.forEach(key => { obj[key] = 0 })(keys)
+      let str = JSON.stringify(obj, null, 2)
+      str = str.replace(/"([^"]+)": 0/gm, (match, key) => {
+        return `${key}: ${JSON.stringify(data[key])}`
+      })
+      const blob = new Blob([str], { type: 'text/plain;charset=utf-8' })
       saveAs(blob, 'plans.json')
     }
   }
