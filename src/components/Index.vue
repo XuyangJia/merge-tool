@@ -61,15 +61,15 @@ export default {
       serverOptions: [
         { name: '三国 简体', value: 'http://sg3.ptkill.com', dev: '/sg3' },
         { name: '三国 360', value: 'http://qh.ptkill.com', dev: '/qh' },
-        { name: '三国 韩国', value: 'http://kr.ptkill.com' },
+        { name: '三国 韩国', value: 'http://kr.ptkill.com', dev: '/kr' },
         { name: '三国 繁体', value: 'http://hk.ptkill.com' },
         { name: '三国 日本', value: 'http://jpn.ptkill.com' },
         { name: '警戒 简体', value: 'http://war.ptkill.com' },
         { name: '警戒 37', value: 'http://war37.ptkill.com' }
       ],
       serverIndex: 0,
-      startId: '5660',
-      endId: '5701',
+      startId: '260',
+      endId: '268',
       loading: false,
       inputData: null
     }

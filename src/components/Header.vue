@@ -87,7 +87,7 @@ export default {
       R.forEach(key => { obj[key] = 0 })(keys)
       let str = JSON.stringify(obj, null, 2)
       str = str.replace(/"([^"]+)": 0/gm, (match, key) => {
-        return `${key}: ${JSON.stringify(data[key])}`
+        return `"${key}": ${JSON.stringify(data[key])}`
       })
       const blob = new Blob([str], { type: 'text/plain;charset=utf-8' })
       saveAs(blob, 'plans.json')

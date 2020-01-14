@@ -27,6 +27,13 @@ module.exports = {
         pathRewrite: {
           '^/qh': '/'
         }
+      },
+      '/kr': {
+        target: 'http://kr.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/kr': '/'
+        }
       }
     }
   }
