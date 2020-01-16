@@ -50,6 +50,7 @@
 </template>
 
 <script>
+import * as R from 'ramda'
 import JsonEditor from './JsonEditor.vue'
 export default {
   components: {
@@ -68,8 +69,8 @@ export default {
         { name: '警戒 37', value: 'http://war37.ptkill.com' }
       ],
       serverIndex: 0,
-      startId: '260',
-      endId: '268',
+      startId: '',
+      endId: '',
       loading: false,
       inputData: null
     }
@@ -174,32 +175,33 @@ export default {
     },
     restore () {
       const planObj = JSON.parse(this.inputData)
-      const zones = Object.keys(planObj).sort()
-      const newPlanObj = {}
-      zones.forEach(key => {
-        const newZone = planObj[key].to_zone
-        if (newPlanObj[newZone]) {
-          newPlanObj[newZone] = newPlanObj[newZone].concat(planObj[key].country)
+      const obj = {}
+      R.forEachObjIndexed((v, k) => {
+        obj[v.to_zone] = obj[v.to_zone] || []
+        obj[v.to_zone].push(k)
+      })(planObj)
+      function getCompareNum (str) {
+        const reg = /(h(\d+)_)?(\d+)/
+        const result = str.match(reg)
+        if (result[2]) {
+          return parseInt(result[2]) * 10000 + parseInt(result[3])
         } else {
-          newPlanObj[newZone] = [].concat(planObj[key].country)
+          return parseInt(result[3])
         }
-      })
-      const newZones = Object.keys(newPlanObj).sort()
-      const plans = newZones.map(newZone => newPlanObj[newZone])
-      let startIndex = 0
+      }
+      const zones = Object.keys(planObj).sort((a, b) => getCompareNum(a) - getCompareNum(b))
       let lastPlans = []
-      plans.forEach(arr => {
-        const zoneNum = arr.length / 3
+      R.forEachObjIndexed((v, k) => {
+        const plan = R.compose(R.flatten, R.map(item => planObj[item].country))(v)
         lastPlans.push([
-          [[0, arr]],
-          startIndex,
-          zoneNum
+          [[0, plan]],
+          zones.indexOf(v[0]),
+          v.length
         ])
-        startIndex += zoneNum
-      })
+      })(obj)
+      this.$store.dispatch('merge/setLastPlanObj', Object.freeze(planObj))
       this.$store.dispatch('merge/setLastPlans', lastPlans)
       this.getCountryData(zones)
-      console.log(zones, planObj, lastPlans)
     }
   }
 }

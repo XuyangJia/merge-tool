@@ -2,9 +2,9 @@
   <el-collapse-item>
     <template slot="title"> <h2>{{ title }}</h2> </template>
     <el-divider></el-divider>
-    <el-row v-if="errMsg === ''" :gutter="20">
+    <el-row v-if="errMsg === '' && showOtherPlan" :gutter="20">
       <el-col :span="3" :offset="2">
-        <el-select v-if="showOtherPlan" v-model="planIndex">
+        <el-select v-model="planIndex">
           <el-option v-for="(item, index) in variances" :key="index" :label="`方案${index + 1} 方差：${item[0]}`" :value="index"></el-option>
         </el-select>
       </el-col>
@@ -14,7 +14,7 @@
         </div>
       </el-col>
       <el-col :span="4">
-        <el-input v-if="showOtherPlan" placeholder="请输入内容" v-model="zoneNum">
+        <el-input placeholder="请输入内容" v-model="zoneNum">
           <template slot="prepend">自定义区数量：</template>
           <el-button slot="append" icon="el-icon-s-promotion" @click="handleChange"></el-button>
         </el-input>
@@ -201,7 +201,7 @@ export default {
       }
       const arr = [this.countries[this.startZone * 3]]
       arr.push(this.countries[this.endZone * 3 - 1])
-      return arr.map(x => x.zone).join(' - ') + ' 区'
+      return arr.map(x => x.zone).join(' - ') + ` 区 --> ${this.targetZone}区`
     },
     showOtherPlan: function () {
       return this.plans && this.plans.length
@@ -213,7 +213,7 @@ export default {
       return ['魏', '蜀', '吴']
     },
     options: function () {
-      const result = this.config.keys.concat('potentialS')
+      const result = this.config.keys.concat(this.showOtherPlan ? 'potentialS' : [])
       let index = result.indexOf('activeCoin')
       index = result.indexOf('country')
       result.splice(index + 1, 0, 'target')
@@ -228,10 +228,18 @@ export default {
     ...mapGetters('merge', {
       mergeTimes: 'mergeTimes',
       startIndex: 'startIndex',
+      lastPlanObj: 'lastPlanObj',
       countries: 'countries',
       lastPlans: 'lastPlans',
       plans: 'plans'
     }),
+    targetZone: function () {
+      if (this.showOtherPlan) {
+        return `h${this.mergeTimes}_${this.startIndex + this.planId}`
+      } else {
+        return this.lastPlanObj[this.countries[this.startZone * 3].zone].to_zone
+      }
+    },
     currntPlanSum: function () {
       if (!this.currntPlan) return []
       const keys = this.options2
@@ -244,7 +252,7 @@ export default {
         keys.forEach(key => {
           result[key] = R.compose(R.sum, R.map(R.prop(key)))(arr)
         })
-        result.zone = `h${this.mergeTimes}_${this.startIndex + this.planId}`
+        result.zone = this.targetZone
         result.country = countryId
         result.countryNum = arr.length
         result.top1 = R.compose(R.nth(-1), R.sort(diff), R.map(R.prop('top1')))(arr)
@@ -255,7 +263,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   .my-header {
     padding: 5px 0 !important;
     color: #303133;
@@ -263,5 +271,8 @@ export default {
   }
   .el-col {
     border-radius: 4px;
+  }
+  .el-divider {
+    margin: 0 0 5px 0 !important;
   }
 </style>

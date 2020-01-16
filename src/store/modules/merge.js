@@ -5,6 +5,7 @@ import { getMergePlans } from '../../js/mergeUtil'
 const state = {
   mergeTimes: 0, // 拿到的这些国家的当前合服次数
   startIndex: 0, // 起始位置
+  lastPlanObj: {},
   countries: [],
   items: [],
   lastPlans: [],
@@ -15,6 +16,7 @@ const state = {
 const getters = {
   mergeTimes: state => state.mergeTimes,
   startIndex: state => state.startIndex,
+  lastPlanObj: state => state.lastPlanObj,
   countries: state => state.countries,
   plans: state => state.items,
   lastPlans: state => state.lastPlans,
@@ -67,6 +69,9 @@ const mutations = {
   },
   setLastPlans (state, data) {
     state.lastPlans = data
+  },
+  setLastPlanObj (state, data) {
+    state.lastPlanObj = data
   }
 }
 
@@ -86,6 +91,9 @@ const actions = {
   },
   setLastPlans ({ commit }, data) {
     commit('setLastPlans', data)
+  },
+  setLastPlanObj ({ commit }, data) {
+    commit('setLastPlanObj', data)
   }
 }
 
