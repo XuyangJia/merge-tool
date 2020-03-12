@@ -63,10 +63,10 @@ export default {
         { name: '三国 简体', value: 'http://sg3.ptkill.com', dev: '/sg3' },
         { name: '三国 360', value: 'http://qh.ptkill.com', dev: '/qh' },
         { name: '三国 韩国', value: 'http://kr.ptkill.com', dev: '/kr' },
-        { name: '三国 繁体', value: 'http://hk.ptkill.com' },
-        { name: '三国 日本', value: 'http://jpn.ptkill.com' },
-        { name: '警戒 简体', value: 'http://war.ptkill.com' },
-        { name: '警戒 37', value: 'http://war37.ptkill.com' }
+        { name: '三国 繁体', value: 'http://hk.ptkill.com', dev: '/hk' },
+        { name: '三国 日本', value: 'http://jpn.ptkill.com', dev: '/jpn' },
+        { name: '警戒 简体', value: 'http://war.ptkill.com', dev: '/war' },
+        { name: '警戒 37', value: 'http://war37.ptkill.com', dev: '/war37' }
       ],
       serverIndex: 0,
       startId: '',

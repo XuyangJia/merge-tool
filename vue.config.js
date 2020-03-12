@@ -34,6 +34,34 @@ module.exports = {
         pathRewrite: {
           '^/kr': '/'
         }
+      },
+      '/hk': {
+        target: 'http://hk.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/hk': '/'
+        }
+      },
+      '/jpn': {
+        target: 'http://jpn.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/jpn': '/'
+        }
+      },
+      '/war': {
+        target: 'http://war.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/war': '/'
+        }
+      },
+      '/war37': {
+        target: 'http://war37.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/war37': '/'
+        }
       }
     }
   }
