@@ -1,10 +1,11 @@
 <template>
   <div>
+    <el-switch v-model="showConfig"/>
     <el-row v-if="notRequest">
       <el-col :span="10" :offset="1">
-        <JsonEditor/>
+        <JsonEditor v-if="showConfig"/>
       </el-col>
-      <el-col :span="12" :offset="1">
+      <el-col :span="showConfig ? 12 : 24" :offset="showConfig ? 1 : 0">
         <div class="input-container">
           <el-divider content-position="center">选择服务器</el-divider>
           <el-form :inline="true" class="demo-form-inline">
@@ -51,6 +52,7 @@
 
 <script>
 import * as R from 'ramda'
+import getConfig from '../js/config'
 import JsonEditor from './JsonEditor.vue'
 export default {
   components: {
@@ -69,8 +71,9 @@ export default {
         { name: '警戒 37', value: 'http://war37.ptkill.com', dev: '/war37' }
       ],
       serverIndex: 0,
-      startId: '',
-      endId: '',
+      startId: '372',
+      endId: '374',
+      showConfig: false,
       loading: false,
       inputData: null
     }
@@ -95,7 +98,12 @@ export default {
       this.axios.post(`${this.api}/get_zone_country_data/`, JSON.stringify({ zones })).then((response) => {
         // console.log(JSON.stringify(response.data))
         // response.data = JSON.parse('[["13",45,0,6,175,4,21,139917,3332653,21899997,60151,87680,0,904888,11655,32925227,1341326],["13",45,1,1,123,1,10,28352,1214286,4015585,318,360,0,98639,3147,5107294,472857],["13",45,2,2,97,5,10,98805,3250568,16841285,60013,97862,0,290858,9680,29365759,1271864],["14",44,0,9,322,7,7,103732,3218234,12489268,46292,78062,0,612982,11754,6942136,1275082],["14",44,1,0,33,0,3,18305,493386,1098330,602,3110,0,70139,1153,1024168,174522],["14",44,2,0,40,1,6,37312,794675,2178029,224,2692,0,170287,1764,2545995,337412],["15",44,0,0,79,2,8,49295,2095274,6051651,16448,29942,0,266746,4768,5026309,724119],["15",44,1,3,105,2,8,64240,2407705,8444682,19474,37180,0,485617,6281,7576352,740920],["15",44,2,6,211,5,6,87292,3503241,14515368,62615,110308,0,451354,11636,13301601,1009915],["16",43,0,2,76,2,6,48265,1544581,5087218,30277,45696,0,283445,4767,2055895,790675],["16",43,1,2,60,0,7,33125,725093,2688641,0,7962,0,70376,2233,1258891,213608],["16",43,2,5,259,7,12,131191,1963868,17345272,75697,132000,0,1443705,12126,9296632,883962]]')
-        const config = JSON.parse(localStorage.getItem('merge-tool-config'))
+        let startZone = response.data.start_zone
+        const matchs = startZone.match(/^h(\d+)_(\d+)$/)
+        const mergeTimes = parseInt(matchs[1]) - 1
+        const configStr = localStorage.getItem(`mergToolSaveKey_${mergeTimes}`)
+        const config = configStr ? JSON.parse(configStr) : getConfig(mergeTimes)
+        localStorage.setItem('merge-tool-config', JSON.stringify(config))
         const origindata = response.data.data.map(item => {
           const result = {}
           config.keys.forEach((key, i) => {
@@ -104,12 +112,10 @@ export default {
           result.top1 = item[item.length - 1] // 单将最高战力永远取最后一位
           return result
         })
-        let startZone = response.data.start_zone
         if (/None/.test(startZone)) {
           startZone.replace(/None/, 0)
           console.error('后端回传的起始ID有误')
         }
-        console.log(origindata)
         this.$store.dispatch('merge/setStartZone', startZone)
         this.$store.dispatch('merge/setCountryData', origindata)
         this.$router.push('merge')
