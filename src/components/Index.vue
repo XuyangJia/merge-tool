@@ -101,6 +101,7 @@ export default {
           config.keys.forEach((key, i) => {
             result[key] = item[i]
           })
+          result.top1 = item[item.length - 1] // 单将最高战力永远取最后一位
           return result
         })
         let startZone = response.data.start_zone
@@ -108,6 +109,7 @@ export default {
           startZone.replace(/None/, 0)
           console.error('后端回传的起始ID有误')
         }
+        console.log(origindata)
         this.$store.dispatch('merge/setStartZone', startZone)
         this.$store.dispatch('merge/setCountryData', origindata)
         this.$router.push('merge')
