@@ -24,7 +24,7 @@ function allocateTop6 (top3) {
     top3Pos[1] = (countrys[0] + 1) % 3
     top3Pos[2] = (countrys[0] + 2) % 3
   }
-  let result = [[]]
+  const result = [[]]
   for (let i = 0; i < 3; ++i) {
     for (let len = result.length - 1; len >= 0; --len) {
       const temp = result[len].slice(0, i)
@@ -49,6 +49,7 @@ function getPlans (countries) {
   let dataSorted = sortWithPower(countries.concat())
   // 计算所有国家潜力
   const { Right2, Right3, Right4, Right5, Right6 } = config
+  console.log(dataSorted.length)
   mapIndexed((item, i) => {
     const right1 = config.Right1[Math.floor(i / 3)] || 0
     item.potential = item.topPower * right1 +
@@ -57,6 +58,15 @@ function getPlans (countries) {
     item.activePay30 * Right4 +
     (item.powerfulNum + item.activeNum) * Right5 +
     item.activeCoin * Right6
+
+    // console.log('\n---------------------  每个国家潜力值（按战力排序）  ----------------------------')
+    // console.log(item.topPower, right1,
+    //   item.activePowerSum, Right2,
+    //   (item.activePay + item.activePayFake), Right3,
+    //   item.activePay30, Right4,
+    //   (item.powerfulNum + item.activeNum), Right5,
+    //   item.activeCoin, Right6)
+    // console.log('潜力值：', item.potential)
   })(dataSorted)
   const sortWithPotential = sortByProp('potential')
   // 按照国家潜力排序
@@ -127,7 +137,7 @@ function search (top6) {
 }
 
 function getValue (plan) {
-  let valueBusy = [0, 0, 0]
+  const valueBusy = [0, 0, 0]
   let valueFree = 0
   plan.forEach((id, index) => {
     valueBusy[id] += countriesSorted[index].potentialS

@@ -4,7 +4,7 @@ const cfg = [
     Right2: 0.1,
     Right3: 50,
     Right4: 170,
-    Right5: 4000000,
+    Right5: 40000,
     Right6: 5,
     idealS: 500, // 理想比较方差
     maxNum: 250, // 人数上限
@@ -17,7 +17,7 @@ const cfg = [
     Right2: 0.03,
     Right3: 10,
     Right4: 140,
-    Right5: 2150000,
+    Right5: 21500,
     Right6: 3.3,
     idealS: 500, // 理想比较方差
     maxNum: 250, // 人数上限

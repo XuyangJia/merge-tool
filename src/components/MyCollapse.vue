@@ -124,6 +124,7 @@ export default {
         this.variance = plan[0]
         this.currntPlan = plan[1].concat()
         // this.currntPlan = [1, 2, 2, 1, 1, 1, 2, 2, 0, 0, 2, 0]
+        variance(this.currntPlan, this.countryData)
         this.$store.dispatch('merge/setBestPlan', [this.planId, plan])
       }
     },

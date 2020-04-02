@@ -10,6 +10,12 @@ const mapIndexed = R.addIndex(R.map)
 function variance (plan, countries) {
   if (!config) {
     config = JSON.parse(localStorage.getItem('merge-tool-config'))
+    config.Right1 = [50, 40, 30, 20, 10, 0] // 使用原始权重计算方差
+    config.Right2 = 200
+    config.Right3 = 30
+    config.Right4 = 60
+    config.Right5 = 200
+    config.Right6 = 50
   }
 
   // 1. 尖端战力
@@ -29,11 +35,12 @@ function variance (plan, countries) {
   })(config.numRight)
   numRight = numRight || config.numRight[config.numRight.length - 1]
 
-  // console.log({ topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins })
   const potentials = getPotentials(topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins)
   const potentialAverage = average(potentials)
-  // console.log(`potentials：${potentials}`)
-  // console.log(`平均潜力值：${potentialAverage}`)
+  // console.log({ topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins })
+  // console.log(`合服后潜力值: ${potentials}`)
+  // console.log(`平均潜力值: ${potentialAverage}`)
+  // console.log(`numRight: ${numRight}`)
   return Math.round(R.compose(R.sum, R.map(num => Math.pow(num - potentialAverage, 2)))(potentials) / numRight[1])
 }
 
@@ -49,9 +56,9 @@ function getTopPowers (plan, countries) {
     const right = config.Right1[arr[country].length]
     right && arr[country].push(val.topPower * right)
     topPowerSum += val.topPower
+    // console.log('topPower：', val.topPower, right, (val.topPower * right))
   })(rank)
   arr = R.map(R.sum)(arr)
-  // console.log('topPower', arr, topPowerSum)
   return R.map(x => x / (topPowerSum / 3), arr)
 }
 
