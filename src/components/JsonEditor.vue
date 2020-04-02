@@ -23,7 +23,7 @@ import vueJsonEditor from 'vue-json-editor'
 import * as R from 'ramda'
 import * as marked from 'marked'
 import getConfig from '../js/config'
-const storageKey = 'mergToolSaveKey2_'
+const storageKey = 'MergToolSaveKey_'
 export default {
   data () {
     return {

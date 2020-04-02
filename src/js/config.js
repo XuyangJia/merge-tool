@@ -13,12 +13,12 @@ const cfg = [
     freeRatio: 1.02 // 未分标力系数
   },
   { // 二次合服
-    Right1: [0.4, 0.3, 0.3, 0.1, 0.05, 0],
-    Right2: 0.03,
-    Right3: 10,
-    Right4: 140,
-    Right5: 21500,
-    Right6: 3.3,
+    Right1: [140, 120, 100, 80, 60, 0],
+    Right2: 250,
+    Right3: 200,
+    Right4: 600,
+    Right5: 150,
+    Right6: 200,
     idealS: 500, // 理想比较方差
     maxNum: 250, // 人数上限
     queryTimes: 100, // 查找次数

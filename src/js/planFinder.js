@@ -41,32 +41,44 @@ function allocateTop6 (top3) {
 
 function getPlans (countries) {
   oriCountries = countries
-  if (!config) {
-    config = JSON.parse(localStorage.getItem('merge-tool-config'))
-  }
+  config = JSON.parse(localStorage.getItem('merge-tool-config'))
   const sortWithPower = sortByProp('topPower')
   // 按照尖端战力排序
   let dataSorted = sortWithPower(countries.concat())
   // 计算所有国家潜力
   const { Right2, Right3, Right4, Right5, Right6 } = config
-  console.log(dataSorted.length)
-  mapIndexed((item, i) => {
-    const right1 = config.Right1[Math.floor(i / 3)] || 0
-    item.potential = item.topPower * right1 +
-    item.activePowerSum * Right2 +
-    (item.activePay + item.activePayFake) * Right3 +
-    item.activePay30 * Right4 +
-    (item.powerfulNum + item.activeNum) * Right5 +
-    item.activeCoin * Right6
 
-    // console.log('\n---------------------  每个国家潜力值（按战力排序）  ----------------------------')
-    // console.log(item.topPower, right1,
-    //   item.activePowerSum, Right2,
-    //   (item.activePay + item.activePayFake), Right3,
-    //   item.activePay30, Right4,
-    //   (item.powerfulNum + item.activeNum), Right5,
-    //   item.activeCoin, Right6)
-    // console.log('潜力值：', item.potential)
+  const sumObj = { topPower: 0, activePowerSum: 0, pay: 0, activePay30: 0, num: 0, activeCoin: 0 }
+  R.forEach(item => {
+    sumObj.topPower += item.topPower
+    sumObj.activePowerSum += item.activePowerSum
+    sumObj.pay += (item.activePay + item.activePayFake)
+    sumObj.activePay30 += item.activePay30
+    sumObj.num += (item.powerfulNum + item.activeNum)
+    sumObj.activeCoin += item.activeCoin
+  })(dataSorted)
+
+  mapIndexed((item, i) => {
+    // const right1 = config.Right1[i] || 0
+    const right1 = config.Right1[Math.floor(i / 3)] || 0
+
+    // 除0容错
+    item.potential = item.topPower * right1 / (sumObj.topPower || 1) +
+    item.activePowerSum * Right2 / (sumObj.activePowerSum || 1) +
+    (item.activePay + item.activePayFake) * Right3 / (sumObj.pay || 1) +
+    item.activePay30 * Right4 / (sumObj.activePay30 || 1) +
+    (item.powerfulNum + item.activeNum) * Right5 / (sumObj.num || 1) +
+    item.activeCoin * Right6 / (sumObj.activeCoin || 1)
+
+    console.log(`计算国家潜力值\n
+    \t\t\t数据\t\t总和\t\t权重\t加权结果\n
+    尖端战力:\t${item.topPower}\t\t${sumObj.topPower}\t${right1}\t\t${item.topPower * right1 / (sumObj.topPower || 1)}\n
+    活跃总战力:\t${item.activePowerSum}\t\t${sumObj.activePowerSum}\t${Right2}\t\t${item.activePowerSum * Right2 / (sumObj.activePowerSum || 1)}\n
+    充值总额:\t${item.activePay + item.activePayFake}\t\t${sumObj.pay}\t${Right3}\t\t${(item.activePay + item.activePayFake) * Right3 / (sumObj.pay || 1)}\n
+    30日充值:\t${item.activePay30}\t\t${sumObj.activePay30}\t${Right4}\t\t${item.activePay30 * Right4 / (sumObj.activePay30 || 1)}\n
+    玩家数量:\t${item.powerfulNum + item.activeNum}\t\t${sumObj.num}\t${Right5}\t\t${item.powerfulNum + item.activeNum * Right5 / (sumObj.num || 1)}\n
+    30日充值:\t${item.activeCoin}\t\t${sumObj.activeCoin}\t${Right6}\t\t${item.activeCoin * Right6 / (sumObj.activeCoin || 1)}\n
+    潜力值: ${item.potential}`)
   })(dataSorted)
   const sortWithPotential = sortByProp('potential')
   // 按照国家潜力排序

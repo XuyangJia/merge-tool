@@ -18,9 +18,7 @@ function sendMsg (msg) {
 }
 
 function getSingleMergePlan (data, force) {
-  if (!config) {
-    config = JSON.parse(localStorage.getItem('merge-tool-config'))
-  }
+  config = JSON.parse(localStorage.getItem('merge-tool-config'))
   const minNum = config.numRight[0][0]
   const maxNum = config.maxNum
 
