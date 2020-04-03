@@ -1,11 +1,11 @@
 const cfg = [
   { // 一次合服
-    Right1: [0.8, 0.6, 0.4, 0.2, 0.1, 0],
-    Right2: 0.1,
-    Right3: 50,
-    Right4: 170,
-    Right5: 40000,
-    Right6: 5,
+    Right1: [32, 30, 28, 26, 24, 0],
+    Right2: 30,
+    Right3: 40,
+    Right4: 60,
+    Right5: 20,
+    Right6: 40,
     idealS: 500, // 理想比较方差
     maxNum: 250, // 人数上限
     queryTimes: 100, // 查找次数
@@ -13,12 +13,12 @@ const cfg = [
     freeRatio: 1.02 // 未分标力系数
   },
   { // 二次合服
-    Right1: [140, 120, 100, 80, 60, 0],
-    Right2: 250,
-    Right3: 200,
-    Right4: 600,
-    Right5: 150,
-    Right6: 200,
+    Right1: [32, 30, 28, 26, 24, 0],
+    Right2: 55,
+    Right3: 65,
+    Right4: 100,
+    Right5: 15,
+    Right6: 70,
     idealS: 500, // 理想比较方差
     maxNum: 250, // 人数上限
     queryTimes: 100, // 查找次数

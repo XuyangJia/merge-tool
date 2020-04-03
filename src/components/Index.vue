@@ -101,7 +101,7 @@ export default {
         let startZone = response.data.start_zone
         const matchs = startZone.match(/^h(\d+)_(\d+)$/)
         const mergeTimes = parseInt(matchs[1]) - 1
-        const configStr = localStorage.getItem(`MergToolSaveKey_${mergeTimes}`)
+        const configStr = localStorage.getItem(`MergToolSaveKey2_${mergeTimes}`)
         const config = configStr ? JSON.parse(configStr) : getConfig(mergeTimes)
         localStorage.setItem('merge-tool-config', JSON.stringify(config))
         const origindata = response.data.data.map(item => {
