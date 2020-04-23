@@ -62,6 +62,13 @@ module.exports = {
         pathRewrite: {
           '^/war37': '/'
         }
+      },
+      '/local': {
+        target: 'http://192.168.1.128:8888/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/local': '/'
+        }
       }
     }
   }
