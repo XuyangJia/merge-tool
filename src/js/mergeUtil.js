@@ -1,6 +1,7 @@
 import * as R from 'ramda'
 import { getPlans } from './planFinder'
 import { variance } from './variance'
+import { getLocalKey } from './storageKey'
 let config = null
 
 const STATUS_ZONE_SHORT = 0
@@ -18,7 +19,7 @@ function sendMsg (msg) {
 }
 
 function getSingleMergePlan (data, force) {
-  config = JSON.parse(localStorage.getItem('merge-tool-config'))
+  config = JSON.parse(localStorage.getItem(getLocalKey()))
   const minNum = config.numRight[0][0]
   const maxNum = config.maxNum
 
@@ -59,7 +60,7 @@ function calculate (data) {
  */
 function countPlayers (arr) {
   return R.reduce((acc, elem) => {
-    return acc + elem.powerfulNum + elem.activeNum
+    return acc + elem.powerfulNum + elem.activeNum + elem.normalNum
   }, 0, arr)
 }
 

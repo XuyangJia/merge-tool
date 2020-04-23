@@ -57,6 +57,7 @@ export default function (mergeTimes) {
       cityNum: '城池总数',
       powerfulNum: '活跃高战',
       activeNum: '活跃中坚',
+      normalNum: '活跃低战*0.5',
       rankScore: '排名积分',
       topPower: '活跃尖端战力',
       activePowerSum: '活跃总战力',
@@ -72,6 +73,6 @@ export default function (mergeTimes) {
       coinSum: '总coin',
       potentialS: '标准化潜力'
     },
-    keys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay30', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'top20', 'top1']
+    keys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay30', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'top20', 'normalNum', 'top1']
   }, cfg[mergeTimes])
 }

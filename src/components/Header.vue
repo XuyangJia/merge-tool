@@ -30,6 +30,7 @@
 import * as R from 'ramda'
 import { mapGetters } from 'vuex'
 import { saveAs } from 'file-saver'
+import { getLocalKey } from '../js/storageKey'
 export default {
   data: function () {
     return {
@@ -66,7 +67,7 @@ export default {
         const toZone = getZone(index)
         let countryArr = this.countries.slice(cursor, cursor + plan.length)
         const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countryArr)
-        const config = JSON.parse(localStorage.getItem('merge-tool-config'))
+        const config = JSON.parse(localStorage.getItem(getLocalKey()))
         const rewardCfg = config.reward[this.mergeTimes - 1]
         const equalizeDay = maxDay + (1000 / rewardCfg.coin)
         mapIndexed((country, i) => {

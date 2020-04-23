@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import { getLocalKey } from './storageKey'
 let config = null
 
 const mapIndexed = R.addIndex(R.map)
@@ -8,17 +9,17 @@ const mapIndexed = R.addIndex(R.map)
  * @param {*} countries 国家数据
  */
 function variance (plan, countries) {
-  config = JSON.parse(localStorage.getItem('merge-tool-config'))
+  config = JSON.parse(localStorage.getItem(getLocalKey()))
 
   // 1. 尖端战力
   const topPowers = getTopPowers(plan, countries)
   const activePowers = getSumByProp(plan, countries, config.Right2, ['activePowerSum']) // 计算国家潜力值 活跃战力
   const payMoneys = getSumByProp(plan, countries, config.Right3, ['activePay', 'activePayFake']) // 计算国家潜力值 充值
   const payMoneys30 = getSumByProp(plan, countries, config.Right4, ['activePay30']) // 计算国家潜力值 30日充值
-  const playerNums = getSumByProp(plan, countries, config.Right5, ['powerfulNum', 'activeNum']) // 计算国家潜力值 玩家数
+  const playerNums = getSumByProp(plan, countries, config.Right5, ['powerfulNum', 'activeNum', 'normalNum']) // 计算国家潜力值 玩家数
   const activeCoins = getSumByProp(plan, countries, config.Right6, ['activeCoin']) // 计算国家潜力值 活跃coin
 
-  let totalNum = R.compose(R.sum, R.map(x => (x.powerfulNum + x.activeNum)))(countries)
+  let totalNum = R.compose(R.sum, R.map(x => (x.powerfulNum + x.activeNum + x.normalNum)))(countries)
   // console.log(`总人数：${totalNum}`)
   totalNum = Math.floor(totalNum * 0.1) * 10
 
@@ -29,9 +30,9 @@ function variance (plan, countries) {
 
   const potentials = getPotentials(topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins)
   const potentialAverage = average(potentials)
-  console.log({ topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins })
-  console.log(`合服后潜力值: ${potentials}`)
-  console.log(`平均潜力值: ${potentialAverage}`)
+  // console.log({ topPowers, activePowers, payMoneys, payMoneys30, playerNums, activeCoins })
+  // console.log(`合服后潜力值: ${potentials}`)
+  // console.log(`平均潜力值: ${potentialAverage}`)
   // console.log(`numRight: ${numRight}`)
   return Math.round(R.compose(R.sum, R.map(num => Math.pow(num - potentialAverage, 2)))(potentials) / numRight[1])
 }

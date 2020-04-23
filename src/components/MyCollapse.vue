@@ -70,6 +70,7 @@
 import { mapGetters } from 'vuex'
 import * as R from 'ramda'
 import { variance } from '../js/variance'
+import { getLocalKey } from '../js/storageKey'
 export default {
   props: [ 'planId' ],
   data () {
@@ -95,7 +96,7 @@ export default {
       this.items = this.lastPlans
     }
     const planArr = this.items[this.planId]
-    this.config = JSON.parse(localStorage.getItem('merge-tool-config'))
+    this.config = JSON.parse(localStorage.getItem(getLocalKey()))
     if (Array.isArray(planArr[0])) {
       this.startZone = planArr[1]
       this.endZone = planArr[1] + planArr[2]
@@ -215,9 +216,14 @@ export default {
     },
     options: function () {
       const result = this.config.keys.concat(this.showOtherPlan ? 'potentialS' : [])
-      let index = result.indexOf('activeCoin')
-      index = result.indexOf('country')
+      let index = result.indexOf('country')
       result.splice(index + 1, 0, 'target')
+
+      index = result.indexOf('normalNum')
+      result.splice(index, 1)
+
+      index = result.indexOf('activeNum')
+      result.splice(index + 1, 0, 'normalNum')
       return result
     },
     options2: function () {
