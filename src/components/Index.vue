@@ -74,8 +74,8 @@ export default {
         { name: '本地128', value: 'http://192.168.1.128:8888', dev: '/local' }
       ],
       serverIndex: 0,
-      startId: '1',
-      endId: '3',
+      startId: '',
+      endId: '',
       showConfig: false,
       loading: false,
       inputData: null

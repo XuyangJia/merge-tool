@@ -19,7 +19,7 @@ function variance (plan, countries) {
   const playerNums = getSumByProp(plan, countries, config.Right5, ['powerfulNum', 'activeNum', 'normalNum']) // 计算国家潜力值 玩家数
   const activeCoins = getSumByProp(plan, countries, config.Right6, ['activeCoin']) // 计算国家潜力值 活跃coin
 
-  let totalNum = R.compose(R.sum, R.map(x => (x.powerfulNum + x.activeNum + x.normalNum)))(countries)
+  let totalNum = R.compose(R.sum, R.map(x => (x.powerfulNum + x.activeNum)))(countries)
   // console.log(`总人数：${totalNum}`)
   totalNum = Math.floor(totalNum * 0.1) * 10
 
