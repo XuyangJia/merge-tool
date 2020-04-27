@@ -60,7 +60,7 @@ function calculate (data) {
  */
 function countPlayers (arr) {
   return R.reduce((acc, elem) => {
-    return acc + elem.powerfulNum + elem.activeNum
+    return acc + elem.powerfulNum + elem.activeNum + elem.normalNum
   }, 0, arr)
 }
 

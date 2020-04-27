@@ -23,7 +23,8 @@ import vueJsonEditor from 'vue-json-editor'
 import * as R from 'ramda'
 import * as marked from 'marked'
 import getConfig from '../js/config'
-const storageKey = 'MergToolSaveKey2_'
+import { getLocalKey } from '../js/storageKey'
+const storageKey = `edit_${getLocalKey()}`
 export default {
   data () {
     return {
@@ -31,7 +32,8 @@ export default {
       configIndex: 0,
       configs: [
         { name: '一次合服', value: 0 },
-        { name: '二次合服', value: 1 }
+        { name: '二次合服', value: 1 },
+        { name: '三次合服', value: 2 }
       ]
     }
   },

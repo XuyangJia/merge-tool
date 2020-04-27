@@ -20,6 +20,19 @@ const cfg = [
     Right5: 15,
     Right6: 70,
     idealS: 500, // 理想比较方差
+    maxNum: 330, // 人数上限
+    queryTimes: 100, // 查找次数
+    busyRatio: 1.005, // 幂系数
+    freeRatio: 1.02 // 未分标力系数
+  },
+  { // 三次合服
+    Right1: [32, 30, 28, 26, 24, 0],
+    Right2: 55,
+    Right3: 65,
+    Right4: 100,
+    Right5: 15,
+    Right6: 70,
+    idealS: 500, // 理想比较方差
     maxNum: 250, // 人数上限
     queryTimes: 100, // 查找次数
     busyRatio: 1.005, // 幂系数
@@ -49,6 +62,26 @@ export default function (mergeTimes) {
       { coin: 500, item036: 5 },
       { coin: 200, item036: 10 }
     ],
+    keyMap: {
+      zone: 'zone',
+      open_days: 'days',
+      country: 'country',
+      capital_num: 'capitalNum',
+      city_num: 'cityNum',
+      powerful_num: 'powerfulNum',
+      active_num: 'activeNum',
+      normal_num: 'normalNum',
+      rank_score: 'rankScore',
+      top_power: 'topPower',
+      active_power_sum: 'activePowerSum',
+      thirty_pay_money: 'activePay30',
+      active_pay: 'activePay',
+      active_pay_fake: 'activePayFake',
+      active_coin: 'activeCoin',
+      multiple_Power: 'multiplePower',
+      top20_country_credit: 'top20',
+      best_hero_power: 'top1'
+    },
     titles: {
       zone: '区服',
       days: '开服天数',
