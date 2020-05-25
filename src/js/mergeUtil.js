@@ -31,7 +31,7 @@ function getSingleMergePlan (data, force) {
     return filed(STATUS_ZONE_SHORT, `区数量不足${zonesStr}`)
   } else if (sum < minNum) {
     return filed(STATUS_NOT_ENOUGH, `人数不足: ${sum} < ${minNum}${zonesStr}`)
-  } else if (sum > maxNum && force !== true) {
+  } else if (sum > maxNum && force !== true && num > 2) {
     return filed(STATUS_TOO_MUCH, `人数过多: ${sum} > ${maxNum}${zonesStr}`)
   } else {
     sendMsg(`尝试${zonesStr} 共计${num}个区进行合并，当前总人数${sum}`)

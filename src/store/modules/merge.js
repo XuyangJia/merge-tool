@@ -9,7 +9,8 @@ const state = {
   countries: [],
   items: [],
   lastPlans: [],
-  bestPlans: []
+  bestPlans: [],
+  adjustPlans: []
 }
 
 // getters
@@ -20,7 +21,8 @@ const getters = {
   countries: state => state.countries,
   plans: state => state.items,
   lastPlans: state => state.lastPlans,
-  bestPlans: state => state.bestPlans
+  bestPlans: state => state.bestPlans,
+  adjustPlans: state => state.adjustPlans
 }
 
 function calculatePlans (state, planIndex, zoneNum) {
@@ -40,6 +42,7 @@ function calculatePlans (state, planIndex, zoneNum) {
       plans = plans.concat(remainPlans)
     }
   } else {
+    state.adjustPlans = []
     plans = getMergePlans(state.countries)
   }
   state.items = Object.freeze(plans)
@@ -70,6 +73,10 @@ const mutations = {
   setLastPlans (state, data) {
     state.lastPlans = data
   },
+  setAdjustPlans (state, data) {
+    const [planId, varianceDIY, plan] = data
+    state.adjustPlans[planId] = [varianceDIY, plan]
+  },
   setLastPlanObj (state, data) {
     state.lastPlanObj = data
   }
@@ -91,6 +98,9 @@ const actions = {
   },
   setLastPlans ({ commit }, data) {
     commit('setLastPlans', data)
+  },
+  setAdjustPlans ({ commit }, data) {
+    commit('setAdjustPlans', data)
   },
   setLastPlanObj ({ commit }, data) {
     commit('setLastPlanObj', data)

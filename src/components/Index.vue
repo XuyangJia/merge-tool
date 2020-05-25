@@ -74,8 +74,8 @@ export default {
         { name: '本地128', value: 'http://192.168.1.128:8888', dev: '/local' }
       ],
       serverIndex: 0,
-      startId: '',
-      endId: '',
+      startId: '6782',
+      endId: '6909',
       showConfig: false,
       loading: false,
       inputData: null
@@ -129,7 +129,6 @@ export default {
           }
           return result
         })
-        console.log(origindata)
         if (/None/.test(startZone)) {
           startZone.replace(/None/, 0)
           console.error('后端回传的起始ID有误')

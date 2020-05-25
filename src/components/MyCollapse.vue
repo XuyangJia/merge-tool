@@ -10,7 +10,7 @@
       </el-col>
       <el-col :span="3">
         <div>
-          <el-button type="primary" @click="refresh">重算方差{{` ${varianceDIY ? varianceDIY : ''}`}}</el-button>
+          <el-button :type=" planChanged ? 'danger' : 'success'" @click="refresh">重算方差{{` ${varianceDIY ? varianceDIY : ''}`}}</el-button>
         </div>
       </el-col>
       <el-col :span="4">
@@ -86,7 +86,10 @@ export default {
       planIndex: -1,
       countryData: null,
       top3Index: null,
-      items: null
+      items: null,
+      useOld: false,
+      planInited: false,
+      planChanged: false
     }
   },
   created: function () {
@@ -102,6 +105,9 @@ export default {
       this.endZone = planArr[1] + planArr[2]
       this.planIndex = 0
       this.countryData = this.countries.slice(this.startZone * 3, this.endZone * 3)
+      if (this.adjustPlans[this.planId]) {
+        this.useOld = true
+      }
       const sortWithPower = R.sortWith([R.descend(R.prop('potentialS'))])
       const top3 = R.compose(R.take(3), sortWithPower)(this.countryData.concat())
       this.top3Index = R.map(x => this.countryData.indexOf(x))(top3)
@@ -113,7 +119,19 @@ export default {
     planIndex: {
       immediate: true,
       handler (val) {
-        val >= 0 && this.initPlanData(val)
+        val >= 0 && this.items && this.initPlanData(val)
+      }
+    },
+    currntPlan: {
+      immediate: true,
+      handler (val) {
+        if (this.currntPlan) {
+          if (this.planInited) {
+            this.planChanged = true
+          } else {
+            this.planInited = true
+          }
+        }
       }
     }
   },
@@ -122,12 +140,18 @@ export default {
       this.varianceDIY = null
       const plan = this.variances[index]
       if (plan) {
-        this.variance = plan[0]
-        this.currntPlan = plan[1].concat()
-        // this.currntPlan = [1, 2, 2, 1, 1, 1, 2, 2, 0, 0, 2, 0]
-        variance(this.currntPlan, this.countryData)
-        this.$store.dispatch('merge/setBestPlan', [this.planId, plan])
+        this.planChanged = this.planInited = false
+        this.setPlan(this.useOld ? this.adjustPlans[this.planId] : plan)
+        this.useOld = false
       }
+    },
+    setPlan (plan) {
+      this.variance = plan[0]
+      this.currntPlan = plan[1].concat()
+      console.log('渲染2:', this.planId)
+      console.log(this.currntPlan)
+      variance(this.currntPlan, this.countryData)
+      this.$store.dispatch('merge/setBestPlan', [this.planId, plan])
     },
     getTableHead (key) {
       return this.config.titles[key]
@@ -170,6 +194,8 @@ export default {
     refresh () {
       this.varianceDIY = variance(this.currntPlan, this.countryData)
       this.$store.dispatch('merge/setBestPlan', [this.planId, [this.varianceDIY, this.currntPlan]])
+      this.$store.dispatch('merge/setAdjustPlans', [this.planId, this.varianceDIY, this.currntPlan])
+      this.planChanged = false
     },
     handleChange () {
       const num = +this.zoneNum
@@ -238,6 +264,8 @@ export default {
       lastPlanObj: 'lastPlanObj',
       countries: 'countries',
       lastPlans: 'lastPlans',
+      bestPlans: 'bestPlans',
+      adjustPlans: 'adjustPlans',
       plans: 'plans'
     }),
     targetZone: function () {
