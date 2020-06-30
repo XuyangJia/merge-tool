@@ -8,23 +8,43 @@
       <el-col :span="showConfig ? 12 : 24" :offset="showConfig ? 1 : 0">
         <div class="input-container">
           <el-divider content-position="center">选择服务器</el-divider>
-          <el-form :inline="true" class="demo-form-inline">
-              <el-select v-model="serverIndex"  placeholder="请选择服务器">
-                <el-option v-for="(item, index) in serverOptions" :key="index" :label="item.name" :value="index"></el-option>
-              </el-select>
-          </el-form>
+          <el-select v-model="serverIndex"  placeholder="请选择服务器">
+            <el-option v-for="(item, index) in serverOptions" :key="index" :label="item.name" :value="index"></el-option>
+          </el-select>
           <el-divider content-position="center">选择合区段</el-divider>
-          <el-form :inline="true" class="demo-form-inline">
-            <el-form-item label="起始ID">
-              <el-input v-model="startId" clearable placeholder="Start ID"></el-input>
-            </el-form-item>
-            <el-form-item label="结束ID">
-              <el-input v-model="endId" clearable placeholder="End ID"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="onSubmit">提交</el-button>
-            </el-form-item>
-          </el-form>
+          <el-table
+          :data="mergeIds"
+          size="mini"
+          :show-header="false"
+          :border="false">
+          <el-table-column
+            prop="0"
+            align="center">
+            <template slot-scope="scope">
+              <el-input v-model.trim="scope.row['0']" clearable placeholder="起始ID"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="1"
+            align="center">
+            <template slot-scope="scope">
+              <el-input v-model.trim="scope.row['1']" clearable placeholder="结束ID"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column
+            align="center">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="danger"
+                @click="handleDelete(scope.$index)">删除</el-button>
+            </template>
+          </el-table-column>
+          </el-table>
+          <el-button type="primary" @click="onSubmit">提交</el-button>
+          <el-tooltip content="点击添加合区段" placement="right">
+            <el-button type="success" @click="addZone" plain icon="el-icon-plus" circle></el-button>
+          </el-tooltip>
           <el-divider content-position="center">还原合服计划（需要选择对应的服务器）</el-divider>
           <div v-if="!inputData">
             <input ref="json-upload-input" class="json-upload-input" type="file" accept=".json" @change="handleClick">
@@ -69,13 +89,13 @@ export default {
         { name: '三国 韩国', value: 'http://kr.ptkill.com', dev: '/kr' },
         { name: '三国 繁体', value: 'http://hk.ptkill.com', dev: '/hk' },
         { name: '三国 日本', value: 'http://jpn.ptkill.com', dev: '/jpn' },
+        { name: '三国 越南', value: 'http://vn.ptkill.com', dev: '/vn' },
         { name: '警戒 简体', value: 'http://war.ptkill.com', dev: '/war' },
         { name: '警戒 37', value: 'http://war37.ptkill.com', dev: '/war37' },
         { name: '本地128', value: 'http://192.168.1.128:8888', dev: '/local' }
       ],
       serverIndex: 0,
-      startId: '6782',
-      endId: '6909',
+      mergeIds: [['h1_1390', 'h1_1410']],
       showConfig: false,
       loading: false,
       inputData: null
@@ -89,21 +109,29 @@ export default {
   methods: {
     onSubmit: function (event) {
       const reg = /(h\d+_)?(\d+)$/
-      const prefix = this.startId.match(reg)[1] || ''
-      const start = parseInt(this.startId.match(reg)[2])
-      const end = parseInt(this.endId.match(reg)[2])
-      const zones = Array.from({ length: end - start + 1 }, (_, i) => `${prefix}${start + i}`)
+      const zones = this.mergeIds.map(([startId, endId]) => {
+        const prefix = startId.match(reg)[1] || ''
+        const start = parseInt(startId.match(reg)[2])
+        const end = parseInt(endId.match(reg)[2])
+        return Array.from({ length: end - start + 1 }, (_, i) => `${prefix}${start + i}`)
+      }).flat()
       this.$store.dispatch('merge/setLastPlans', [])
       this.getCountryData(zones)
+    },
+    addZone () {
+      this.mergeIds.push([])
+    },
+    handleDelete (index) {
+      this.mergeIds.splice(index, 1)
     },
     getCountryData (zones) {
       this.notRequest = false
       const sign = crypto.createHash('md5').update(`zones=${JSON.stringify(zones)}yWSExXmzgwCYNlUVRfIMTtoHpcPvkhBn`).digest('hex')
-      if (this.serverIndex === 7) {
-        this.axios.defaults.headers.post['Content-Type'] = 'application/json'
-      }
-      this.axios.post(`${this.api}/get_zone_country_data/`, JSON.stringify({ zones, sign })).then((response) => {
-        let startZone = response.data.start_zone
+      // if (this.serverIndex === this.serverOptions.length - 1) {
+      //   this.axios.defaults.headers.post['Content-Type'] = 'application/json'
+      // }
+      this.axios.post(`${this.api}/get_zone_country_data/`, { zones, sign }).then((response) => {
+        let { start_zone: startZone, zone_range: zoneRange } = response.data
         const matchs = startZone.match(/^h(\d+)_(\d+)$/)
         const mergeTimes = parseInt(matchs[1]) - 1
         const configStr = localStorage.getItem(`edit_${getLocalKey()}`)
@@ -133,7 +161,7 @@ export default {
           startZone.replace(/None/, 0)
           console.error('后端回传的起始ID有误')
         }
-        this.$store.dispatch('merge/setStartZone', startZone)
+        this.$store.dispatch('merge/setZoneData', { startZone, zoneRange })
         this.$store.dispatch('merge/setCountryData', origindata)
         this.$router.push('merge')
       }).catch(console.error)
@@ -241,8 +269,12 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-.el-col {
-  padding: 3px 0;
+.el-table {
+  text-align: center;
+  width: 60em;
+}
+.cell {
+  align-items: center;
 }
 .json-upload-input{
   display: none;

@@ -23,7 +23,6 @@
     <el-table
       v-if="planIndex >= 0"
       :data="currntPlan"
-      header-cell-class-name="my-header"
       :cell-style="setCellStyle"
       size="mini"
       fit
@@ -47,7 +46,6 @@
     <el-table
       v-if="planIndex >= 0"
       :data="currntPlanSum"
-      header-cell-class-name="my-header"
       :cell-style="setCellStyle2"
       show-summary
       size="mini"
@@ -261,6 +259,7 @@ export default {
     ...mapGetters('merge', {
       mergeTimes: 'mergeTimes',
       startIndex: 'startIndex',
+      zoneRange: 'zoneRange',
       lastPlanObj: 'lastPlanObj',
       countries: 'countries',
       lastPlans: 'lastPlans',
@@ -270,7 +269,16 @@ export default {
     }),
     targetZone: function () {
       if (this.showOtherPlan) {
-        return `h${this.mergeTimes}_${this.startIndex + this.planId}`
+        let id = this.startIndex + this.planId
+        for (let i = 0, len = this.zoneRange.length; i < len; i++) {
+          const arr = this.zoneRange[i]
+          if (id <= arr[1]) {
+            break
+          } else {
+            id = id - (arr[1] + 1) + this.zoneRange[i + 1][0]
+          }
+        }
+        return `h${this.mergeTimes}_${id}`
       } else {
         return this.lastPlanObj[this.countries[this.startZone * 3].zone].to_zone
       }
@@ -299,11 +307,6 @@ export default {
 </script>
 
 <style scoped>
-  .my-header {
-    padding: 5px 0 !important;
-    color: #303133;
-    text-align: center !important;
-  }
   .el-col {
     border-radius: 4px;
   }

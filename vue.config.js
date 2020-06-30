@@ -49,6 +49,13 @@ module.exports = {
           '^/jpn': '/'
         }
       },
+      '/vn': {
+        target: 'http://vn.ptkill.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/vn': '/'
+        }
+      },
       '/war': {
         target: 'http://war.ptkill.com/',
         changeOrigin: true,

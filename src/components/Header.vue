@@ -42,6 +42,7 @@ export default {
     ...mapGetters('merge', {
       mergeTimes: 'mergeTimes',
       startIndex: 'startIndex',
+      zoneRange: 'zoneRange',
       countries: 'countries',
       bestPlans: 'bestPlans'
     })
@@ -54,13 +55,24 @@ export default {
       this.dialogVisible = true
       const planData = R.map(R.prop('to_zone'))(this.getExportPlans())
       const oriZones = R.keys(planData).sort()
-      const mergeZones = [...new Set(R.values(planData))].sort()
+      const mergeZones = [...new Set(R.values(planData))]
       const str = JSON.stringify(oriZones.concat(mergeZones))
       this.content = str.substring(1, str.length - 1)
     },
     getExportPlans: function () {
       const mapIndexed = R.addIndex(R.map)
-      const getZone = index => `h${this.mergeTimes}_${this.startIndex + index}`
+      const getZone = index => {
+        let id = this.startIndex + index
+        for (let i = 0, len = this.zoneRange.length; i < len; i++) {
+          const arr = this.zoneRange[i]
+          if (id <= arr[1]) {
+            break
+          } else {
+            id = id - (arr[1] + 1) + this.zoneRange[i + 1][0]
+          }
+        }
+        return `h${this.mergeTimes}_${id}`
+      }
       let cursor = 0 // 计算进度
       const plans = mapIndexed((plan, index) => {
         const result = {}

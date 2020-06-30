@@ -5,6 +5,7 @@ import { getMergePlans } from '../../js/mergeUtil'
 const state = {
   mergeTimes: 0, // 拿到的这些国家的当前合服次数
   startIndex: 0, // 起始位置
+  zoneRange: [],
   lastPlanObj: {},
   countries: [],
   items: [],
@@ -17,6 +18,7 @@ const state = {
 const getters = {
   mergeTimes: state => state.mergeTimes,
   startIndex: state => state.startIndex,
+  zoneRange: state => state.zoneRange,
   lastPlanObj: state => state.lastPlanObj,
   countries: state => state.countries,
   plans: state => state.items,
@@ -58,10 +60,11 @@ const mutations = {
       state.items = state.bestPlans = []
     }
   },
-  setStartZone (state, startId) {
-    const matchs = startId.match(/^h(\d+)_(\d+)$/)
+  setZoneData (state, { startZone, zoneRange }) {
+    const matchs = startZone.match(/^h(\d+)_(\d+)$/)
     state.mergeTimes = parseInt(matchs[1])
     state.startIndex = parseInt(matchs[2])
+    state.zoneRange = zoneRange
   },
   refreshPlans (state, data) {
     data && calculatePlans(state, ...data)
@@ -84,8 +87,8 @@ const mutations = {
 
 // actions
 const actions = {
-  setStartZone ({ commit }, data) {
-    commit('setStartZone', data)
+  setZoneData ({ commit }, data) {
+    commit('setZoneData', data)
   },
   setCountryData ({ commit }, origindata) {
     commit('setCountries', origindata)
