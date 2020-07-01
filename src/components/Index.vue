@@ -12,35 +12,41 @@
             <el-option v-for="(item, index) in serverOptions" :key="index" :label="item.name" :value="index"></el-option>
           </el-select>
           <el-divider content-position="center">选择合区段</el-divider>
-          <el-table
-          :data="mergeIds"
-          size="mini"
-          :show-header="false"
-          :border="false">
-          <el-table-column
-            prop="0"
-            align="center">
-            <template slot-scope="scope">
-              <el-input v-model.trim="scope.row['0']" clearable placeholder="起始ID"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="1"
-            align="center">
-            <template slot-scope="scope">
-              <el-input v-model.trim="scope.row['1']" clearable placeholder="结束ID"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column
-            align="center">
-            <template slot-scope="scope">
-              <el-button
+          <el-row>
+            <el-col :xs="2" :sm="5" :md="7" :lg="8" :xl="9"/>
+            <el-col :xs="20" :sm="16" :md="12" :lg="10" :xl="8">
+              <el-table
+                :data="mergeIds"
+                stripe
                 size="mini"
-                type="danger"
-                @click="handleDelete(scope.$index)">删除</el-button>
-            </template>
-          </el-table-column>
-          </el-table>
+                :show-header="false"
+                :border="false">
+                <el-table-column
+                  prop="0"
+                  align="center">
+                  <template slot-scope="scope">
+                    <el-input size="mini" v-model.trim="scope.row['0']" clearable placeholder="起始ID"></el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="1"
+                  align="center">
+                  <template slot-scope="scope">
+                    <el-input size="mini" v-model.trim="scope.row['1']" clearable placeholder="结束ID"></el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  align="left">
+                  <template slot-scope="scope">
+                    <el-button
+                      size="mini"
+                      type="danger"
+                      @click="handleDelete(scope.$index)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-col>
+          </el-row>
           <el-button type="primary" @click="onSubmit">提交</el-button>
           <el-tooltip content="点击添加合区段" placement="right">
             <el-button type="success" @click="addZone" plain icon="el-icon-plus" circle></el-button>
@@ -132,6 +138,7 @@ export default {
       // }
       this.axios.post(`${this.api}/get_zone_country_data/`, { zones, sign }).then((response) => {
         let { start_zone: startZone, zone_range: zoneRange } = response.data
+        zoneRange = zoneRange || [[1, 10 ** 6]]
         const matchs = startZone.match(/^h(\d+)_(\d+)$/)
         const mergeTimes = parseInt(matchs[1]) - 1
         const configStr = localStorage.getItem(`edit_${getLocalKey()}`)
@@ -270,11 +277,9 @@ export default {
   align-items: center;
 }
 .el-table {
+  /* padding: 0 100px; */
   text-align: center;
-  width: 60em;
-}
-.cell {
-  align-items: center;
+  /* width: 60em; */
 }
 .json-upload-input{
   display: none;

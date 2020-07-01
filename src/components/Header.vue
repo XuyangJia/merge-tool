@@ -1,16 +1,19 @@
 <template>
   <div>
     <el-row class="header">
-      <el-col :span="2">
-        <el-button type="warning" @click="backToHome"><i class="el-icon-s-home el-icon--left">主页</i></el-button>
+      <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
+        <el-button size="mini" type="warning" @click="backToHome"><i class="el-icon-s-home el-icon--left">主页</i></el-button>
       </el-col>
-      <el-col :span="18">
+      <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
+        <el-button size="mini" type="success" @click="exportPlans">导出<i class="el-icon-download el-icon--right"></i></el-button>
       </el-col>
-      <el-col :span="2">
-        <el-button type="info" @click="openDialog">影响的区<i class="el-icon-search el-icon--right"></i></el-button>
+      <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
+        <el-button size="mini" type="info" @click="openDialog">影响的区<i class="el-icon-search el-icon--right"></i></el-button>
       </el-col>
-      <el-col :span="2">
-        <el-button type="success" @click="exportPlans">导出<i class="el-icon-download el-icon--right"></i></el-button>
+      <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
+        <el-tooltip class="item" effect="dark" :content="JSON.stringify(zoneRange)" placement="bottom">
+          <el-button size="mini" type="info">合法区段</el-button>
+        </el-tooltip>
       </el-col>
     </el-row>
     <el-dialog
