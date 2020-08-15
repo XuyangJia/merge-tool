@@ -2,8 +2,8 @@
   <div>
     <el-form :inline="true">
       <el-form-item label="选择配置">
-        <el-select v-model="configIndex">
-            <el-option v-for="(item, index) in configs" :key="index" :label="item.name" :value="index"></el-option>
+        <el-select v-model="mergeTimes">
+            <el-option v-for="(item, index) in configs" :key="index" :label="item.name" :value="item.value"></el-option>
           </el-select>
       </el-form-item>
     </el-form>
@@ -20,20 +20,17 @@
 
 <script>
 import vueJsonEditor from 'vue-json-editor'
-import * as R from 'ramda'
 import * as marked from 'marked'
-import getConfig from '../js/config'
-import { getLocalKey } from '../js/storageKey'
-const storageKey = `edit_${getLocalKey()}`
+import { getConfig, saveConfig } from '../js/config'
 export default {
   data () {
     return {
       jsonData: null,
-      configIndex: 0,
+      mergeTimes: 1,
       configs: [
-        { name: '一次合服', value: 0 },
-        { name: '二次合服', value: 1 },
-        { name: '三次合服', value: 2 }
+        { name: '一次合服', value: 1 },
+        { name: '二次合服', value: 2 },
+        { name: '三次合服', value: 3 }
       ]
     }
   },
@@ -44,13 +41,13 @@ export default {
     vueJsonEditor
   },
   watch: {
-    configIndex: function (val, oldVal) {
+    mergeTimes: function (val, oldVal) {
       this.refresh()
     }
   },
   computed: {
     note () {
-      const config = getConfig(this.configIndex)
+      const config = getConfig(this.mergeTimes)
       const noteStr = `#### 合并之后三个国家对应属性所占的权重
   | 属性              | 权重                             |
   | ----------------- | -------------------------------- |
@@ -70,22 +67,13 @@ export default {
   },
   methods: {
     refresh () {
-      const config = getConfig(this.configIndex)
-      const configStr = localStorage.getItem(storageKey + this.configIndex)
-      let localConfig = configStr ? JSON.parse(localStorage.getItem(storageKey + this.configIndex)) : {}
-      delete localConfig.titles
-      delete localConfig.keys
-      localConfig = Object.assign({}, ...[config, localConfig])
-      localConfig = R.pick(Object.keys(config))(localConfig)
-      this.jsonData = R.compose(R.clone, R.omit(['titles', 'keys']))(localConfig)
-      localStorage.setItem(storageKey + this.configIndex, JSON.stringify(Object.assign(config, localConfig)))
+      this.jsonData = getConfig(this.mergeTimes)
     },
     onJsonChange (value) {
       console.log('value:', value)
     },
     onJsonSave (value) {
-      const config = getConfig(this.configIndex)
-      localStorage.setItem(storageKey + this.configIndex, JSON.stringify(Object.assign(config, value)))
+      saveConfig(this.mergeTimes, this.jsonData)
       this.$notify({
         title: '成功',
         message: '配置已成功保存至本地',

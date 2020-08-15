@@ -1,15 +1,13 @@
 import * as R from 'ramda'
-import { getLocalKey } from './storageKey'
 let config = null
-
 const mapIndexed = R.addIndex(R.map)
 
 /**
  * 计算方差
  * @param {*} countries 国家数据
  */
-function variance (plan, countries) {
-  config = JSON.parse(localStorage.getItem(getLocalKey()))
+function variance (plan, countries, cfg) {
+  config = cfg
 
   // 1. 尖端战力
   const topPowers = getTopPowers(plan, countries)

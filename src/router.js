@@ -12,6 +12,6 @@ export default new VueRouter({
   routes: [
     { path: '/', component: Index },
     { path: '/about', component: About },
-    { path: '/merge', component: Merge }
+    { path: '/merge/:newTool', component: Merge, props: true }
   ]
 })

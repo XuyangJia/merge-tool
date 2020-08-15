@@ -5,6 +5,7 @@ import App from './components/App.vue'
 import store from './store'
 import router from './router'
 import './plugins/element.js'
+import './assets/css/global.css'
 
 // axios.defaults.headers.post['Content-Type'] = 'application/json'
 Vue.use(VueAxios, axios)

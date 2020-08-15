@@ -1,7 +1,8 @@
 <template>
   <div>
     <el-switch v-model="showConfig"/>
-    <el-row v-if="notRequest">
+    <el-row
+    v-loading.fullscreen.lock="loading">
       <el-col :span="10" :offset="1">
         <JsonEditor v-if="showConfig"/>
       </el-col>
@@ -79,8 +80,7 @@
 <script>
 import * as R from 'ramda'
 import crypto from 'crypto'
-import getConfig from '../js/config'
-import { getLocalKey } from '../js/storageKey'
+import { changeServerData } from '../js/mergeUtil'
 import JsonEditor from './JsonEditor.vue'
 export default {
   components: {
@@ -88,7 +88,7 @@ export default {
   },
   data: function () {
     return {
-      notRequest: true,
+      loading: false,
       serverOptions: [
         { name: '三国 简体', value: 'http://sg3.ptkill.com', dev: '/sg3' },
         { name: '三国 360', value: 'http://qh.ptkill.com', dev: '/qh' },
@@ -101,9 +101,8 @@ export default {
         { name: '本地128', value: 'http://192.168.1.128:8888', dev: '/local' }
       ],
       serverIndex: 0,
-      mergeIds: [['h1_1390', 'h1_1410']],
+      mergeIds: [['1', '3']],
       showConfig: false,
-      loading: false,
       inputData: null
     }
   },
@@ -121,7 +120,6 @@ export default {
         const end = parseInt(endId.match(reg)[2])
         return Array.from({ length: end - start + 1 }, (_, i) => `${prefix}${start + i}`)
       }).flat()
-      this.$store.dispatch('merge/setLastPlans', [])
       this.getCountryData(zones)
     },
     addZone () {
@@ -131,47 +129,34 @@ export default {
       this.mergeIds.splice(index, 1)
     },
     getCountryData (zones) {
-      this.notRequest = false
-      const sign = crypto.createHash('md5').update(`zones=${JSON.stringify(zones)}yWSExXmzgwCYNlUVRfIMTtoHpcPvkhBn`).digest('hex')
-      // if (this.serverIndex === this.serverOptions.length - 1) {
-      //   this.axios.defaults.headers.post['Content-Type'] = 'application/json'
-      // }
-      this.axios.post(`${this.api}/get_zone_country_data/`, { zones, sign }).then((response) => {
-        let { start_zone: startZone, zone_range: zoneRange } = response.data
+      this.loading = true
+      // const sign = crypto.createHash('md5').update(`zones=${JSON.stringify(zones)}yWSExXmzgwCYNlUVRfIMTtoHpcPvkhBn`).digest('hex')
+      // // if (this.serverIndex === this.serverOptions.length - 1) {
+      // //   this.axios.defaults.headers.post['Content-Type'] = 'application/json'
+      // // }
+      // this.axios.post(`${this.api}/get_zone_country_data/`, { zones, sign }).then((response) => {
+      //   let { data: countries, start_zone: startZone, zone_range: zoneRange } = response.data
+      //   if (/None/.test(startZone)) {
+      //     startZone.replace(/None/, 0)
+      //     console.error('后端回传的起始ID有误')
+      //     return
+      //   }
+
+        /**
+         * 测试数据
+         */
+        const mockData = require('../js/mockData.json')
+        let { data: countries, start_zone: startZone, zone_range: zoneRange } = mockData
+
         zoneRange = zoneRange || [[1, 10 ** 6]]
+        countries = changeServerData(countries)
+        this.$store.dispatch('initStore', { zoneRange, startZone, countries })
+
+        // 跳转到合服页面开始计算
         const matchs = startZone.match(/^h(\d+)_(\d+)$/)
-        const mergeTimes = parseInt(matchs[1]) - 1
-        const configStr = localStorage.getItem(`edit_${getLocalKey()}`)
-        const config = configStr ? JSON.parse(configStr) : getConfig(mergeTimes)
-        localStorage.setItem(getLocalKey(), JSON.stringify(config))
-        const origindata = response.data.data.map(item => {
-          const result = {}
-          if (Array.isArray(item)) { // 列表
-            config.keys.forEach((key, i) => {
-              result[key] = item[i]
-            })
-            result.top1 = item[item.length - 1] // 单将最高战力永远取最后一位
-            if (item.length === 17) {
-              result.normalNum = 0
-            } else {
-              result.normalNum = item[item.length - 2] * 0.5 // 活跃低战
-            }
-          } else { // 字典
-            for (const key in config.keyMap) {
-              const newKey = config.keyMap[key]
-              result[newKey] = item[key]
-            }
-          }
-          return result
-        })
-        if (/None/.test(startZone)) {
-          startZone.replace(/None/, 0)
-          console.error('后端回传的起始ID有误')
-        }
-        this.$store.dispatch('merge/setZoneData', { startZone, zoneRange })
-        this.$store.dispatch('merge/setCountryData', origindata)
-        this.$router.push('merge')
-      }).catch(console.error)
+        const mergeTimes = parseInt(matchs[1])
+        this.$router.push({ path: `merge/${mergeTimes >= 3}` })
+      // }).catch(console.error)
     },
     handleDrop (e) {
       e.stopPropagation()
@@ -259,8 +244,8 @@ export default {
           v.length
         ])
       })(obj)
-      this.$store.dispatch('merge/setLastPlanObj', Object.freeze(planObj))
-      this.$store.dispatch('merge/setLastPlans', lastPlans)
+      this.$store.dispatch('mergeOld/setLastPlanObj', Object.freeze(planObj))
+      this.$store.dispatch('mergeOld/setLastPlans', lastPlans)
       this.getCountryData(zones)
     }
   }

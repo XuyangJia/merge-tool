@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { getLocalKey } from './storageKey'
+import { getConfig } from './config'
 let config = null
 let oriCountries = null // 国家数据
 let countriesSorted = null // 按标力排序后的国家数据
@@ -39,9 +39,9 @@ function allocateTop6 (top3) {
   return R.map(item => top3Pos.concat(item))(result)
 }
 
-function getPlans (countries) {
+function getPlans (countries, cfg) {
   oriCountries = countries
-  config = JSON.parse(localStorage.getItem(getLocalKey()))
+  config = cfg
   const sortWithPower = sortByProp('topPower')
   // 按照尖端战力排序
   let dataSorted = sortWithPower(countries.concat())

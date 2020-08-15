@@ -1,13 +1,22 @@
 /**
- * Get the first item that pass the test
- * by second argument function
- *
+ * 求和
  * @param {Array} list
- * @param {Function} f
- * @return {*}
+ * @return {Number}
  */
-export function find (list, f) {
-  return list.filter(f)[0]
+export function sum (list) {
+  return list.reduce((acc, cur) => acc + cur, 0)
+}
+
+/**
+ * 计算方差
+ * @param {Array} list
+ * @return {Number}
+ */
+export function variance (list) {
+  if (list.length === 0) return 0
+  const average = sum(list) / list.length
+  const total = list.reduce((acc, cur) => acc + Math.pow(cur - average, 2), 0)
+  return total / list.length
 }
 
 /**
@@ -26,7 +35,7 @@ export function deepCopy (obj, cache = []) {
   }
 
   // if obj is hit, it is in circular structure
-  const hit = find(cache, c => c.original === obj)
+  const hit = cache.find(c => c.original === obj)
   if (hit) {
     return hit.copy
   }
@@ -44,29 +53,4 @@ export function deepCopy (obj, cache = []) {
   })
 
   return copy
-}
-
-/**
- * forEach for object
- */
-export function forEachValue (obj, fn) {
-  Object.keys(obj).forEach(key => fn(obj[key], key))
-}
-
-export function isObject (obj) {
-  return obj !== null && typeof obj === 'object'
-}
-
-export function isPromise (val) {
-  return val && typeof val.then === 'function'
-}
-
-export function assert (condition, msg) {
-  if (!condition) throw new Error(`[vuex] ${msg}`)
-}
-
-export function partial (fn, arg) {
-  return function () {
-    return fn(arg)
-  }
 }

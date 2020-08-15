@@ -1,27 +1,21 @@
+import { getMergePlans } from '../../js/planGenerator'
+import { getConfig } from '../../js/config'
 
-import { getMergePlans } from '../../js/mergeUtil'
-
-// initial state
 const state = {
-  mergeTimes: 0, // 拿到的这些国家的当前合服次数
-  startIndex: 0, // 起始位置
-  zoneRange: [],
   lastPlanObj: {},
   countries: [],
-  items: [],
+  mergeTimes: 1,
+  plans: [],
   lastPlans: [],
   bestPlans: [],
   adjustPlans: []
 }
 
-// getters
 const getters = {
-  mergeTimes: state => state.mergeTimes,
-  startIndex: state => state.startIndex,
-  zoneRange: state => state.zoneRange,
   lastPlanObj: state => state.lastPlanObj,
   countries: state => state.countries,
-  plans: state => state.items,
+  mergeTimes: state => state.mergeTimes,
+  plans: state => state.plans,
   lastPlans: state => state.lastPlans,
   bestPlans: state => state.bestPlans,
   adjustPlans: state => state.adjustPlans
@@ -29,42 +23,37 @@ const getters = {
 
 function calculatePlans (state, planIndex, zoneNum) {
   let plans = null
+  const config = getConfig(state.mergeTimes)
   if (zoneNum) {
-    const currentPlan = state.items[planIndex]
-    plans = state.items.slice(0, planIndex)
-    state.items = []
+    const currentPlan = state.plans[planIndex]
+    plans = state.plans.slice(0, planIndex)
+    state.plans = []
     state.bestPlans = []
     const cursor = currentPlan[1]
     const startPos = cursor * 3
     const endPos = startPos + zoneNum * 3
-    const plan = getMergePlans(state.countries.slice(startPos, endPos), cursor, true)
+    const plan = getMergePlans(state.countries.slice(startPos, endPos), cursor, true, config)
     plans.push([plan, cursor, zoneNum])
     if (state.countries.length > endPos) {
-      const remainPlans = getMergePlans(state.countries.slice(endPos), cursor + zoneNum)
+      const remainPlans = getMergePlans(state.countries.slice(endPos), cursor + zoneNum, false, config)
       plans = plans.concat(remainPlans)
     }
   } else {
     state.adjustPlans = []
-    plans = getMergePlans(state.countries)
+    plans = getMergePlans(state.countries, 0, false, config)
   }
-  state.items = Object.freeze(plans)
+  state.plans = plans
 }
 
-// mutations
 const mutations = {
-  setCountries (state, countries) {
-    state.countries = Object.freeze(countries)
+  setCountries (state, [countries, mergeTimes]) {
+    state.countries = countries
+    state.mergeTimes = mergeTimes
     if (state.lastPlans.length === 0) {
       calculatePlans(state)
     } else {
-      state.items = state.bestPlans = []
+      state.plans = state.bestPlans = []
     }
-  },
-  setZoneData (state, { startZone, zoneRange }) {
-    const matchs = startZone.match(/^h(\d+)_(\d+)$/)
-    state.mergeTimes = parseInt(matchs[1])
-    state.startIndex = parseInt(matchs[2])
-    state.zoneRange = zoneRange
   },
   refreshPlans (state, data) {
     data && calculatePlans(state, ...data)
@@ -85,13 +74,9 @@ const mutations = {
   }
 }
 
-// actions
 const actions = {
-  setZoneData ({ commit }, data) {
-    commit('setZoneData', data)
-  },
-  setCountryData ({ commit }, origindata) {
-    commit('setCountries', origindata)
+  merge ({ commit, rootState }) {
+    commit('setCountries', [rootState.countries, rootState.mergeTimes])
   },
   refreshPlans ({ commit }, data) {
     commit('refreshPlans', data)

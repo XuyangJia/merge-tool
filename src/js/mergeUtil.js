@@ -1,117 +1,113 @@
-import * as R from 'ramda'
-import { getPlans } from './planFinder'
-import { variance } from './variance'
-import { getLocalKey } from './storageKey'
-let config = null
-
-const STATUS_ZONE_SHORT = 0
-const STATUS_NOT_ENOUGH = 1
-const STATUS_TOO_MUCH = 2
-const STATUS_NOT_EXIST = 3
-
-let tempVariances = null
-let cursor = 0
-let zoneNum = 0
-const filed = (status, msg) => ({ status, msg })
-
-function sendMsg (msg) {
-  console.log(msg)
+import { sum } from './util'
+export const CONSTANT = {
+  keyMap: {
+    zone: 'zone',
+    open_days: 'days',
+    country: 'country',
+    capital_num: 'capitalNum',
+    city_num: 'cityNum',
+    powerful_num: 'powerfulNum',
+    active_num: 'activeNum',
+    normal_num: 'normalNum',
+    rank_score: 'rankScore',
+    top_power: 'topPower',
+    active_power_sum: 'activePowerSum',
+    thirty_pay_money: 'activePay30',
+    active_pay: 'activePay',
+    active_pay_fake: 'activePayFake',
+    active_coin: 'activeCoin',
+    multiple_power: 'multiplePower',
+    top20_country_credit: 'top20',
+    best_hero_power: 'top1'
+  },
+  titles: {
+    zone: '区服',
+    days: '开服天数',
+    country: '国家',
+    capitalNum: '都城数',
+    cityNum: '城池总数',
+    powerfulNum: '高战数',
+    activeNum: '中坚数',
+    normalNum: '低战数*0.5',
+    rankScore: '排名积分',
+    topPower: '尖端战力',
+    activePowerSum: '活跃总战力',
+    activePay30: '30日充值',
+    activePay: '实际充值',
+    activePayFake: '虚拟充值',
+    activeCoin: 'Coin',
+    multiplePower: '综合国力',
+    top20: 'Top20',
+    top1: '最高战力',
+    target: '目标国家',
+    countryNum: '原国家数',
+    coinSum: '总coin',
+    potentialS: '标准化潜力',
+    targetZone: '目标区服'
+  },
+  keys: ['zone', 'days', 'country', 'capitalNum', 'cityNum', 'powerfulNum', 'activeNum', 'rankScore', 'topPower', 'activePowerSum', 'activePay30', 'activePay', 'activePayFake', 'activeCoin', 'multiplePower', 'top20', 'normalNum', 'top1']
 }
 
-function getSingleMergePlan (data, force) {
-  config = JSON.parse(localStorage.getItem(getLocalKey()))
-  const minNum = config.numRight[0][0]
-  const maxNum = config.maxNum
-
-  const num = data.length / 3
-  const sum = countPlayers(data)
-  const zonesStr = ` (${data[0].zone}区-${data[data.length - 1].zone}区) `
-  if (num < 2) {
-    zoneNum = num
-    return filed(STATUS_ZONE_SHORT, `区数量不足${zonesStr}`)
-  } else if (sum < minNum) {
-    return filed(STATUS_NOT_ENOUGH, `人数不足: ${sum} < ${minNum}${zonesStr}`)
-  } else if (sum > maxNum && force !== true && num > 2) {
-    return filed(STATUS_TOO_MUCH, `人数过多: ${sum} > ${maxNum}${zonesStr}`)
-  } else {
-    sendMsg(`尝试${zonesStr} 共计${num}个区进行合并，当前总人数${sum}`)
-    return calculate(data)
-  }
-}
-
-function calculate (data) {
-  // 列出所有方案
-  const plans = getPlans(data)
-
-  const variances = R.map(plan => variance(plan, data), plans)
-  const exist = R.any(R.flip(R.lte)(config.idealS), variances)
-  const result = R.sortBy(R.prop('0'), R.zip(variances, plans))
-  if (exist) {
+export function changeServerData (list) {
+  const { keys, keyMap } = CONSTANT
+  return list.map(item => {
+    const result = {}
+    if (Array.isArray(item)) { // 列表
+      keys.forEach((key, i) => {
+        result[key] = item[i]
+      })
+      result.top1 = item[item.length - 1] // 单将最高战力永远取最后一位
+      if (item.length === 17) {
+        result.normalNum = 0
+      } else {
+        result.normalNum = item[item.length - 2] * 0.5 // 活跃低战
+      }
+    } else { // 字典
+      for (const key in keyMap) {
+        const newKey = keyMap[key]
+        result[newKey] = item[key]
+      }
+    }
     return result
-  } else {
-    tempVariances.push(result)
-    return filed(STATUS_NOT_EXIST, `所有组合的方差都大于${config.idealS}`)
-  }
+  })
 }
 
 /**
- * 计算总人数
- * @param {Array} arr
+ * 计算一个国家的潜力值
+ * @param {Array} item 国家数据
  */
-function countPlayers (arr) {
-  return R.reduce((acc, elem) => {
-    return acc + elem.powerfulNum + elem.activeNum + elem.normalNum
-  }, 0, arr)
+export function getPotential (item) {
+  const Right1 = 32
+  const Right2 = 55
+  const Right3 = 65
+  const Right4 = 100
+  const Right5 = 15
+  const Right6 = 70
+  return Right1 * item.topPower +
+  Right2 * item.activePowerSum +
+  Right3 * (item.activePay + item.activePayFake) +
+  Right4 * item.activePay30 +
+  Right5 * sum([item.powerfulNum, item.activeNum, item.normalNum]) +
+  Right6 * item.activeCoin
 }
 
-function chooseBest () {
-  const sortByFirstItem = R.sortBy(R.prop(0))
-  const minVariances = R.map(obj => sortByFirstItem(obj)[0])(tempVariances)
-  const index = minVariances.findIndex(x => x === sortByFirstItem(minVariances)[0])
-  const result = tempVariances[index]
-  zoneNum = result[0][1].length / 3
-  return result
+export function getPlayerNum (item) {
+  return sum([item.powerfulNum, item.activeNum, item.normalNum])
 }
 
-function testMerge (countries) {
-  zoneNum++
-  const current = countries.slice(0, zoneNum * 3)
-  const testData = getSingleMergePlan(current)
-  if ((testData.status === STATUS_TOO_MUCH && R.flatten(tempVariances).length) || (testData.status === STATUS_NOT_EXIST && countries.length < (zoneNum + 1) * 3)) {
-    return chooseBest()
-  } else if (!Array.isArray(testData) && countries.length >= (zoneNum + 1) * 3) {
-    if (testData.status === STATUS_NOT_ENOUGH || testData.status === STATUS_NOT_EXIST) {
-      return testMerge(countries)
+export function toZoneName (startIndex, zoneRange, mergeTimes, i) {
+  let id = startIndex + i
+  for (let i = 0, len = zoneRange.length; i < len; i++) {
+    const arr = zoneRange[i]
+    if (id <= arr[1]) {
+      break
+    } else {
+      if (startIndex > arr[1]) {
+        continue
+      } else {
+        id = id - (arr[1] + 1) + zoneRange[i + 1][0]
+      }
     }
   }
-  return testData
-}
-
-function getAllMergePlan (countries, plans) {
-  tempVariances = [] // 清空临时记录
-  zoneNum = 1
-  let plan = testMerge(countries)
-  if (Array.isArray(plan)) {
-    plan = plan.slice(0, 200)
-  }
-  plans.push([plan, cursor, zoneNum])
-  if (Array.isArray(plan)) {
-    cursor += zoneNum
-    countries.splice(0, zoneNum * 3)
-    if (countries.length) {
-      return getAllMergePlan(countries, plans)
-    }
-  }
-  return plans
-}
-
-export function getMergePlans (countries, progress, single) {
-  cursor = progress || 0
-  countries = countries.concat()
-  if (single) {
-    tempVariances = []
-    const plan = getSingleMergePlan(countries, true)
-    return tempVariances[0] || plan
-  }
-  return getAllMergePlan(countries, [])
+  return `h${mergeTimes}_${id}`
 }

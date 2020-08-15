@@ -8,7 +8,7 @@
         <el-button size="mini" type="success" @click="exportPlans">导出<i class="el-icon-download el-icon--right"></i></el-button>
       </el-col>
       <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
-        <el-button size="mini" type="info" @click="openDialog">影响的区<i class="el-icon-search el-icon--right"></i></el-button>
+        <el-button size="mini" type="info" @click="showAffected">影响的区<i class="el-icon-search el-icon--right"></i></el-button>
       </el-col>
       <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
         <el-tooltip class="item" effect="dark" :content="JSON.stringify(zoneRange)" placement="bottom">
@@ -33,7 +33,8 @@
 import * as R from 'ramda'
 import { mapGetters } from 'vuex'
 import { saveAs } from 'file-saver'
-import { getLocalKey } from '../js/storageKey'
+import { getConfig } from '../js/config'
+import { toZoneName } from '../js/mergeUtil'
 export default {
   data: function () {
     return {
@@ -42,48 +43,40 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('merge', {
-      mergeTimes: 'mergeTimes',
-      startIndex: 'startIndex',
-      zoneRange: 'zoneRange',
-      countries: 'countries',
-      bestPlans: 'bestPlans'
-    })
+    ...mapGetters(['countries', 'mergeTimes', 'startIndex', 'zoneRange'])
   },
   methods: {
     backToHome: function () {
       this.$router.push('/')
     },
-    openDialog: function () {
+    targetZone: function (i) {
+      return toZoneName(this.startIndex, this.zoneRange, this.mergeTimes, i)
+    },
+    getPlans: function () {
+      if (this.mergeTimes < 3) {
+        return this.$store.state.mergeOld.bestPlans
+      } else {
+        return this.$store.state.mergeNew.plans
+      }
+    },
+    showAffected: function () {
       this.dialogVisible = true
-      const planData = R.map(R.prop('to_zone'))(this.getExportPlans())
-      const oriZones = R.keys(planData).sort()
-      const mergeZones = [...new Set(R.values(planData))]
-      const str = JSON.stringify(oriZones.concat(mergeZones))
+      const plans = this.getPlans()
+      const mergeNums = plans.flat(2).length / 3 // 合了多少个区 用来去掉因为去数量不足而未进行合并的区
+      const originalZones = [...new Set(this.countries.map(item => item.zone))].slice(0, mergeNums)
+      const targetZones = new Array(plans.length).fill(null).map((item, i) => this.targetZone(i))
+      const str = JSON.stringify(originalZones.concat(targetZones))
       this.content = str.substring(1, str.length - 1)
     },
-    getExportPlans: function () {
+    exportPlansOld: function () {
       const mapIndexed = R.addIndex(R.map)
-      const getZone = index => {
-        let id = this.startIndex + index
-        for (let i = 0, len = this.zoneRange.length; i < len; i++) {
-          const arr = this.zoneRange[i]
-          if (id <= arr[1]) {
-            break
-          } else {
-            id = id - (arr[1] + 1) + this.zoneRange[i + 1][0]
-          }
-        }
-        return `h${this.mergeTimes}_${id}`
-      }
       let cursor = 0 // 计算进度
-      const plans = mapIndexed((plan, index) => {
+      const plans = mapIndexed((plan, i) => {
         const result = {}
-        const toZone = getZone(index)
+        const toZone = this.targetZone(i)
         let countryArr = this.countries.slice(cursor, cursor + plan.length)
         const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countryArr)
-        const config = JSON.parse(localStorage.getItem(getLocalKey()))
-        const rewardCfg = config.reward[this.mergeTimes - 1]
+        const rewardCfg = getConfig(this.mergeTimes).reward
         const equalizeDay = maxDay + (1000 / rewardCfg.coin)
         mapIndexed((country, i) => {
           const data = countryArr[i]
@@ -93,19 +86,22 @@ export default {
         })(plan)
         cursor += plan.length // 移动游标
         return result
-      })(this.bestPlans)
-      return R.reduce(R.merge, {})(plans)
-    },
-    exportPlans: function () {
-      const data = this.getExportPlans()
+      })(this.getPlans())
+      
+      const data = R.reduce(R.merge, {})(plans)
       const keys = Object.keys(data)
       const obj = {}
       R.forEach(key => { obj[key] = 0 })(keys)
-      let str = JSON.stringify(obj, null, 2)
-      str = str.replace(/"([^"]+)": 0/gm, (match, key) => {
+      return JSON.stringify(obj, null, 2).replace(/"([^"]+)": 0/gm, (match, key) => {
         return `"${key}": ${JSON.stringify(data[key])}`
       })
-      const blob = new Blob([str], { type: 'text/plain;charset=utf-8' })
+    },
+    exportPlansNew: function () {
+      return JSON.stringify(this.getPlans())
+    },
+    exportPlans: function () {
+      const txt = this.mergeTimes < 3 ? this.exportPlansOld() : this.exportPlansNew()
+      const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' })
       saveAs(blob, 'plans.json')
     }
   }

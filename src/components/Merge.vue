@@ -1,57 +1,72 @@
 <template>
   <div>
-    <el-collapse v-if="items && items.length">
-      <MyCollapse v-for="(item, index) in items" :key="index" :planId="index" @reMerge="reMerge"/>
+    <el-collapse>
+      <CollapseNew v-for="(item, index) in itemsNew" :key="index" :planObj="[index, item]"/>
+      <CollapseOld v-for="(item, index) in itemsOld" :key="index" :planObj="[index, item.slice(0, 150)]"/>
     </el-collapse>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import MyCollapse from './MyCollapse.vue'
+import CollapseOld from './CollapseOld.vue'
+import CollapseNew from './CollapseNew.vue'
 export default {
+  props: ['newTool'],
   data: function () {
     return {
-      refresh: false,
-      items: null
+      itemsOld: [],
+      itemsNew: []
     }
   },
+  created () {
+  },
   mounted () {
-    this.items = this.plans.length ? this.plans : this.lastPlans
+    // 计算合服方案
+    if (this.newTool === 'true') {
+      this.mergeNew()
+    } else {
+      this.mergeOld()
+    }
   },
   methods: {
-    reMerge: function (arr) {
-      console.log('重新合区', arr)
-      this.items = []
-      this.refresh = true
-      setTimeout(this.refreshPlans, 200, arr)
+    mergeOld: function () {
+      this.$store.dispatch('mergeOld/merge')
     },
-    refreshPlans: function (arr) {
-      this.$store.dispatch('merge/refreshPlans', arr)
+    mergeNew: function () {
+      this.$store.dispatch('mergeNew/merge')
     }
   },
   watch: {
-    plans: {
-      immediate: true,
+    oldPlans: {
       handler (val) {
-        this.refresh && val && val.length && (this.items = val)
+        val && val.length && (this.itemsOld = val)
       }
     },
-    lastPlans: {
-      immediate: true,
+    lastOldPlans: {
       handler (val) {
-        this.refresh && val && val.length && (this.items = val)
+        val && val.length && (this.itemsOld = val)
+      }
+    },
+    newPlans: {
+      handler (val) {
+        val && val.length && (this.itemsNew = val)
       }
     }
   },
   computed: {
-    ...mapGetters('merge', {
-      plans: 'plans',
-      lastPlans: 'lastPlans'
+    ...mapGetters(['countries']),
+    ...mapGetters('mergeOld', {
+      oldPlans: 'plans',
+      lastOldPlans: 'lastPlans'
+    }),
+    ...mapGetters('mergeNew', {
+      newPlans: 'plans'
     })
   },
   components: {
-    MyCollapse
+    CollapseOld,
+    CollapseNew
   }
 }
 </script>
