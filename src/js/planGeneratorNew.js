@@ -1,4 +1,4 @@
-import { sum, variance } from './util'
+import { sum, variance, shuffle } from './util'
 import { getPotential, getPlayerNum } from './mergeUtil'
 import { getConfig } from './config'
 
@@ -14,6 +14,7 @@ export function calculatePlans (countries) {
   // 初始化基础区中的国家
   const plans = new Array(zoneNum).fill(null).map((item, i) => {
     const plan = [[i], [zoneNum * 2 - i - 1], [zoneNum * 2 + i]]
+    shuffle(plan)
     const planPotential = plan.map(arr => sum(arr.map(i => potentials[i].potential)))
     return {
       plan,
@@ -26,11 +27,11 @@ export function calculatePlans (countries) {
   for (let i = zoneNum * 3, len = potentials.length; i < len; i++) {
     const set = new Set()
     plans.forEach(item => set.add(item.plan.flat().length))
-    const numArr = [...set].sort((a, b) => a - b )
+    const numArr = [...set].sort((a, b) => a - b)
     const planArr = numArr.map(len => {
-      return plans.filter(item => item.plan.flat().length === len )
+      return plans.filter(item => item.plan.flat().length === len)
     })[0]
-    const plan = planArr.sort((a, b) => b.variance - a.variance )[0]
+    const plan = planArr.sort((a, b) => b.variance - a.variance)[0]
     const element = potentials[i]
     insertCountry(plan, element, i)
   }
@@ -60,7 +61,7 @@ export function refreshPlan (countries, list) {
   // 将剩余的国家插入分配好的方案中
   for (let i = 3, len = potentials.length; i < len; i++) {
     const element = potentials[i]
-    insertCountry(plan, element, i)
+    insertCountry(plan, element, element.i)
   }
   return plan.plan
 }

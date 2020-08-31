@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-collapse>
-      <CollapseNew v-for="(item, index) in itemsNew" :key="index" :planObj="[index, item]"/>
-      <CollapseOld v-for="(item, index) in itemsOld" :key="index" :planObj="[index, item.slice(0, 150)]"/>
+      <CollapseNew v-for="(item, index) in newPlans" :key="index" :planIndex="index"/>
+      <CollapseOld v-for="(item, index) in oldPlans" :key="index" :planObj="[index, item.slice(0, 150)]"/>
     </el-collapse>
   </div>
 </template>
@@ -15,11 +15,8 @@ export default {
   props: ['newTool'],
   data: function () {
     return {
-      itemsOld: [],
-      itemsNew: []
+      itemsOld: []
     }
-  },
-  created () {
   },
   mounted () {
     // 计算合服方案
@@ -46,11 +43,6 @@ export default {
     lastOldPlans: {
       handler (val) {
         val && val.length && (this.itemsOld = val)
-      }
-    },
-    newPlans: {
-      handler (val) {
-        val && val.length && (this.itemsNew = val)
       }
     }
   },

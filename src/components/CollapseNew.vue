@@ -63,7 +63,7 @@ import { mapGetters } from 'vuex'
 import * as R from 'ramda'
 import { CONSTANT, toZoneName } from '../js/mergeUtil'
 export default {
-  props: [ 'planObj' ],
+  props: [ 'planIndex' ],
   data () {
     return {
       planId: 0,
@@ -75,20 +75,13 @@ export default {
       dialogVisible: false
     }
   },
-  created () {
+  mounted () {
     this.initPlan()
-  },
-  watch: {
-    planObj: {
-      handler () {
-        this.currntPlan && this.initPlan()
-      }
-    }
   },
   methods: {
     initPlan: function () {
-      this.planId = this.planObj[0]
-      const plan = this.planObj[1]
+      this.planId = this.planIndex
+      const plan = this.plans[this.planId]
       this.currntPlan = plan.map((arr, i) => arr.slice().fill(i)).flat()
       this.countryData = plan.flat().map(i => this.countries[i])
       this.title = ` ${this.targetZone(this.planId)}区`
@@ -110,7 +103,7 @@ export default {
     moveTo () {
       this.dialogVisible = false
       if (this.toZone === -1) {
-        console.log('未选中目标区')
+        console.log('未选中目标区.')
         return
       }
       const { zone, country } = this.countryData[this.editIndex]
@@ -153,6 +146,13 @@ export default {
     },
     dataFormat2 () {
       return this.dataFormat(...arguments, true)
+    }
+  },
+  watch: {
+    plans: {
+      handler (val) {
+        val && val.length && this.initPlan()
+      }
     }
   },
   computed: {

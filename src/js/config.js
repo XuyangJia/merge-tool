@@ -57,6 +57,11 @@ const cfg = {
     { coin: 500, item036: 5 },
     { coin: 200, item036: 10 },
     { coin: 200, item036: 10 }
+  ],
+  rewardExtra: [
+    { coin: 500, item036: 5 },
+    { coin: 200, item036: 10 },
+    { coin: 200, item036: 10 }
   ]
 }
 
@@ -70,8 +75,9 @@ export function getConfig (mergeTimes) {
   if (localData) {
     return localData
   }
-  const { right, numRight, reward } = cfg
-  const config = Object.assign({ numRight, reward: reward[mergeTimes - 1] }, right[mergeTimes - 1])
+  console.log(cfg)
+  const { right, numRight, reward, rewardExtra } = cfg
+  const config = Object.assign({ numRight, reward: reward[mergeTimes - 1], rewardExtra: rewardExtra[mergeTimes - 1] }, right[mergeTimes - 1])
   mergeTimes === 3 && delete config.numRight
   return config
 }

@@ -28,7 +28,8 @@ const mutations = {
     // 加入新方案
     const newArr = state.plans[toZone].flat()
     newArr.push(index)
-    state.plans[toZone] = refreshPlan(state.countries, newArr)
+    const goal = state.plans[toZone]
+    goal.splice(0, goal.length, ...refreshPlan(state.countries, newArr))
   }
 }
 

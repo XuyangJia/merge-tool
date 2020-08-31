@@ -1,8 +1,8 @@
 'use strict'
 const port = process.env.port || process.env.npm_config_port || 8080 // dev port
 module.exports = {
-  publicPath: '/bin/merge',
-  outputDir: 'D:/meng52/Client/bin/merge',
+  publicPath: '/bin/merge2',
+  outputDir: 'D:/meng52/Client/bin/merge2',
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
@@ -54,6 +54,20 @@ module.exports = {
         changeOrigin: true,
         pathRewrite: {
           '^/vn': '/'
+        }
+      },
+      '/ea37': {
+        target: 'http://ea37sg.37games.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/ea37': '/'
+        }
+      },
+      '/tw37': {
+        target: 'http://tw37sg.gm99.com/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/tw37': '/'
         }
       },
       '/war': {

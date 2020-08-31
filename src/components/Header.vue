@@ -5,7 +5,7 @@
         <el-button size="mini" type="warning" @click="backToHome"><i class="el-icon-s-home el-icon--left">主页</i></el-button>
       </el-col>
       <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
-        <el-button size="mini" type="success" @click="exportPlans">导出<i class="el-icon-download el-icon--right"></i></el-button>
+        <el-button size="mini" type="success" @click="exportConfirm">导出<i class="el-icon-download el-icon--right"></i></el-button>
       </el-col>
       <el-col :xs="6" :sm="4" :md="3" :lg="2" :xl="2">
         <el-button size="mini" type="info" @click="showAffected">影响的区<i class="el-icon-search el-icon--right"></i></el-button>
@@ -71,36 +71,83 @@ export default {
     exportPlansOld: function () {
       const mapIndexed = R.addIndex(R.map)
       let cursor = 0 // 计算进度
+      const exportObj = {}
       const plans = mapIndexed((plan, i) => {
         const result = {}
-        const toZone = this.targetZone(i)
-        let countryArr = this.countries.slice(cursor, cursor + plan.length)
+        const to_zone = this.targetZone(i)
+        const countryArr = this.countries.slice(cursor, cursor + plan.length)
         const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countryArr)
-        const rewardCfg = getConfig(this.mergeTimes).reward
+        const { reward: rewardCfg, rewardExtra} = getConfig(this.mergeTimes)
         const equalizeDay = maxDay + (1000 / rewardCfg.coin)
-        mapIndexed((country, i) => {
-          const data = countryArr[i]
-          const zone = data.zone
-          result[zone] || (result[zone] = { to_zone: toZone, reward: R.map(y => y * (equalizeDay - data.days))(rewardCfg), country: [] })
-          result[zone].country[data.country] = country
+        mapIndexed((to_country, i) => {
+          const { zone, country, days } = countryArr[i]
+          const reward = R.map(y => y * (equalizeDay - days))(rewardCfg)
+          for (const key in rewardExtra) {
+            if (reward.hasOwnProperty(key)) {
+              reward[key] += rewardExtra[key]              
+            } else {
+              reward[key] = rewardExtra[key]              
+            }
+          }
+          exportObj[zone] = exportObj[zone] || []
+          exportObj[zone][country] = { to_zone, to_country, reward }
         })(plan)
         cursor += plan.length // 移动游标
         return result
       })(this.getPlans())
+      return exportObj
       
-      const data = R.reduce(R.merge, {})(plans)
-      const keys = Object.keys(data)
-      const obj = {}
-      R.forEach(key => { obj[key] = 0 })(keys)
+      // const data = R.reduce(R.merge, {})(plans)
+      // const keys = Object.keys(data)
+      // const obj = {}
+      // R.forEach(key => { obj[key] = 0 })(keys)
       return JSON.stringify(obj, null, 2).replace(/"([^"]+)": 0/gm, (match, key) => {
         return `"${key}": ${JSON.stringify(data[key])}`
       })
     },
     exportPlansNew: function () {
-      return JSON.stringify(this.getPlans())
+      const plans = this.getPlans()
+      const exportObj = {}
+      const rewardCfg = getConfig(this.mergeTimes).reward
+      plans.forEach((arr, i) => {
+        const to_zone = this.targetZone(i)
+        const countryArr = arr.flat().map(i => this.countries[i])
+        const maxDay = R.reduce((a, b) => Math.max(a, b.days), 0)(countryArr)
+        const equalizeDay = maxDay + (1000 / rewardCfg.coin)
+        arr.forEach((arr2, to_country) => {
+          arr2.forEach(index => {
+            const { zone, country, days } = this.countries[index]
+            const reward = R.map(y => y * (equalizeDay - days))(rewardCfg)
+            exportObj[zone] = exportObj[zone] || []
+            exportObj[zone][country] = { to_zone, to_country, reward }
+          })
+        })
+      })
+      return exportObj
     },
-    exportPlans: function () {
-      const txt = this.mergeTimes < 3 ? this.exportPlansOld() : this.exportPlansNew()
+    exportConfirm: function () {
+      this.$confirm('请选择导出结构', '提示', {
+          confirmButtonText: '新',
+          cancelButtonText: '旧',
+          type: 'info',
+          center: true
+        }).then(() => {
+          this.exportPlans(false)
+        }).catch(() => {
+          this.exportPlans(true)
+        })
+    },
+    exportPlans: function (old) {
+      const exportObj = this.mergeTimes < 3 ? this.exportPlansOld() : this.exportPlansNew()
+      if (old) {
+        for (const key in exportObj) {
+          const element = exportObj[key]
+          const country = element.map(item => item.to_country)
+          const { to_zone, reward } = element[0]
+          exportObj[key] = { to_zone, reward, country }
+        }
+      }
+      const txt = JSON.stringify(exportObj, null, 2)
       const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' })
       saveAs(blob, 'plans.json')
     }

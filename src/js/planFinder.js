@@ -1,5 +1,4 @@
 import * as R from 'ramda'
-import { getConfig } from './config'
 let config = null
 let oriCountries = null // 国家数据
 let countriesSorted = null // 按标力排序后的国家数据

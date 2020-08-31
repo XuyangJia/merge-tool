@@ -52,7 +52,9 @@
           <el-tooltip content="点击添加合区段" placement="right">
             <el-button type="success" @click="addZone" plain icon="el-icon-plus" circle></el-button>
           </el-tooltip>
-          <el-divider content-position="center">还原合服计划（需要选择对应的服务器）</el-divider>
+          <el-divider content-position="center">使用新的合服算法</el-divider>
+          <el-switch v-model="newTool" active-color="#13ce66"></el-switch>
+          <!-- <el-divider content-position="center">还原合服计划（需要选择对应的服务器）</el-divider>
           <div v-if="!inputData">
             <input ref="json-upload-input" class="json-upload-input" type="file" accept=".json" @change="handleClick">
             <div class="drop" @drop="handleDrop" @dragover="handleDragover" @dragenter="handleDragover">
@@ -61,7 +63,7 @@
                 选择文件
               </el-button>
             </div>
-          </div>
+          </div> -->
           <div v-if="inputData">
             <el-input
               type="textarea"
@@ -96,12 +98,15 @@ export default {
         { name: '三国 繁体', value: 'http://hk.ptkill.com', dev: '/hk' },
         { name: '三国 日本', value: 'http://jpn.ptkill.com', dev: '/jpn' },
         { name: '三国 越南', value: 'http://vn.ptkill.com', dev: '/vn' },
+        { name: '37 日本', value: 'http://ea37sg.37games.com', dev: '/ea37' },
+        { name: '37 港台', value: 'http://tw37sg.gm99.com', dev: '/tw37' },
         { name: '警戒 简体', value: 'http://war.ptkill.com', dev: '/war' },
         { name: '警戒 37', value: 'http://war37.ptkill.com', dev: '/war37' },
         { name: '本地128', value: 'http://192.168.1.128:8888', dev: '/local' }
       ],
       serverIndex: 0,
-      mergeIds: [['1', '3']],
+      mergeIds: [[]],
+      newTool: false,
       showConfig: false,
       inputData: null
     }
@@ -130,33 +135,30 @@ export default {
     },
     getCountryData (zones) {
       this.loading = true
-      // const sign = crypto.createHash('md5').update(`zones=${JSON.stringify(zones)}yWSExXmzgwCYNlUVRfIMTtoHpcPvkhBn`).digest('hex')
-      // // if (this.serverIndex === this.serverOptions.length - 1) {
-      // //   this.axios.defaults.headers.post['Content-Type'] = 'application/json'
-      // // }
-      // this.axios.post(`${this.api}/get_zone_country_data/`, { zones, sign }).then((response) => {
-      //   let { data: countries, start_zone: startZone, zone_range: zoneRange } = response.data
-      //   if (/None/.test(startZone)) {
-      //     startZone.replace(/None/, 0)
-      //     console.error('后端回传的起始ID有误')
-      //     return
-      //   }
+      const sign = crypto.createHash('md5').update(`zones=${JSON.stringify(zones)}yWSExXmzgwCYNlUVRfIMTtoHpcPvkhBn`).digest('hex')
+      // if (this.serverIndex === this.serverOptions.length - 1) {
+      //   this.axios.defaults.headers.post['Content-Type'] = 'application/json'
+      // }
+      this.axios.post(`${this.api}/get_zone_country_data/`, { zones, sign }).then((response) => {
+        let { data: countries, start_zone: startZone, zone_range: zoneRange } = response.data
+        if (/None/.test(startZone)) {
+          startZone.replace(/None/, 0)
+          console.error('后端回传的起始ID有误')
+          return
+        }
 
-        /**
-         * 测试数据
-         */
-        const mockData = require('../js/mockData.json')
-        let { data: countries, start_zone: startZone, zone_range: zoneRange } = mockData
+        // /**
+        //  * 测试数据
+        //  */
+        // const mockData = require('../js/mockData.json')
+        // let { data: countries, start_zone: startZone, zone_range: zoneRange } = mockData
 
         zoneRange = zoneRange || [[1, 10 ** 6]]
         countries = changeServerData(countries)
         this.$store.dispatch('initStore', { zoneRange, startZone, countries })
 
-        // 跳转到合服页面开始计算
-        const matchs = startZone.match(/^h(\d+)_(\d+)$/)
-        const mergeTimes = parseInt(matchs[1])
-        this.$router.push({ path: `merge/${mergeTimes >= 3}` })
-      // }).catch(console.error)
+        this.$router.push({ path: `merge/${this.newTool}` })
+      }).catch(console.error)
     },
     handleDrop (e) {
       e.stopPropagation()
