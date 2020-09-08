@@ -105,8 +105,8 @@ export default {
         { name: '本地128', value: 'http://192.168.1.128:8888', dev: '/local' }
       ],
       serverIndex: 0,
-      mergeIds: [[]],
-      newTool: false,
+      mergeIds: [['h2_1', 'h2_10']],
+      newTool: true,
       showConfig: false,
       inputData: null
     }

@@ -14,6 +14,7 @@
       </span>
     </el-dialog>
     <div>
+      <el-button type="primary" size="mini" @click="savePlan()">保存修改</el-button>
       <el-table
         :data="currntPlan"
         :cell-style="setCellStyle"
@@ -108,6 +109,14 @@ export default {
       }
       const { zone, country } = this.countryData[this.editIndex]
       this.$store.dispatch('mergeNew/moveTo', [this.planId, this.toZone, [zone, country]])
+    },
+    savePlan () {
+      const plan = [[], [], []]
+      this.countryData.forEach((item, index) => {
+        const i = this.countries.indexOf(item)
+        plan[this.currntPlan[index]].push(i)
+      })
+      this.$store.dispatch('mergeNew/savePlan', [plan, this.planId])
     },
     getTableHead (key) {
       return CONSTANT.titles[key]
