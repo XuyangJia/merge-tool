@@ -167,7 +167,6 @@ export default {
     setPlan (plan) {
       this.variance = plan[0]
       this.currntPlan = plan[1].concat()
-      
       this.$store.dispatch('mergeOld/setBestPlan', [this.planId, plan])
     },
     getTableHead (key) {

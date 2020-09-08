@@ -14,7 +14,6 @@
       </span>
     </el-dialog>
     <div>
-      <el-button type="primary" size="mini" @click="savePlan()">保存修改</el-button>
       <el-table
         :data="currntPlan"
         :cell-style="setCellStyle"
@@ -161,6 +160,11 @@ export default {
     plans: {
       handler (val) {
         val && val.length && this.initPlan()
+      }
+    },
+    currntPlan: {
+      handler (val) {
+        val && val.length && this.savePlan()
       }
     }
   },
