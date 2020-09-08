@@ -1,9 +1,9 @@
 'use strict'
 const port = process.env.port || process.env.npm_config_port || 8080 // dev port
 module.exports = {
-  publicPath: '/bin/merge2',
-  outputDir: 'D:/meng52/Client/bin/merge2',
-  assetsDir: 'static',
+  publicPath: './',
+  // outputDir: 'dist',
+  // assetsDir: '',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
   devServer: {
