@@ -30,7 +30,7 @@
           header-align="center"
           align="center">
           <template v-if="item.match(/target/)" v-slot:default="slotProps">
-            <el-select v-if="item == 'target'" v-model="currntPlan[slotProps.$index]" size="mini">
+            <el-select v-if="item == 'target'" @change="savePlan" v-model="currntPlan[slotProps.$index]" size="mini">
               <el-option v-for="(item, index) in countryNames" :key="index" :label="item" :value="index"></el-option>
             </el-select>
             <el-button v-if="item == 'targetZone'" @click="handleEdit(slotProps.$index)" type="info" size="mini">编辑</el-button>
@@ -160,11 +160,6 @@ export default {
     plans: {
       handler (val) {
         val && val.length && this.initPlan()
-      }
-    },
-    currntPlan: {
-      handler (val) {
-        val && val.length && this.savePlan()
       }
     }
   },

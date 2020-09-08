@@ -31,8 +31,9 @@ const mutations = {
     const goal = state.plans[toZone]
     goal.splice(0, goal.length, ...refreshPlan(state.countries, newArr))
   },
-  savePlan (state, [plan, i]) {
-    state.plans[i] = plan
+  savePlan (state, [[a, b, c], i]) {
+    const plan = state.plans[i]
+    plan.splice(0, 3, a, b, c)
   }
 }
 

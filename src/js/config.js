@@ -75,7 +75,7 @@ export function getConfig (mergeTimes) {
   if (localData) {
     return localData
   }
-  console.log(cfg)
+  // console.log(cfg)
   const { right, numRight, reward, rewardExtra } = cfg
   const config = Object.assign({ numRight, reward: reward[mergeTimes - 1], rewardExtra: rewardExtra[mergeTimes - 1] }, right[mergeTimes - 1])
   mergeTimes === 3 && delete config.numRight
