@@ -108,7 +108,7 @@ export default {
     exportPlansNew: function () {
       const plans = this.getPlans()
       const exportObj = {}
-      const rewardCfg = getConfig(this.mergeTimes).reward
+      const { reward: rewardCfg, rewardExtra} = getConfig(this.mergeTimes)
       plans.forEach((arr, i) => {
         const to_zone = this.targetZone(i)
         const countryArr = arr.flat().map(i => this.countries[i])
@@ -118,6 +118,13 @@ export default {
           arr2.forEach(index => {
             const { zone, country, days } = this.countries[index]
             const reward = R.map(y => y * (equalizeDay - days))(rewardCfg)
+            for (const key in rewardExtra) {
+              if (reward.hasOwnProperty(key)) {
+                reward[key] += rewardExtra[key]              
+              } else {
+                reward[key] = rewardExtra[key]              
+              }
+            }
             exportObj[zone] = exportObj[zone] || []
             exportObj[zone][country] = { to_zone, to_country, reward }
           })
