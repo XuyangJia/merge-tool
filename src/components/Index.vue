@@ -54,7 +54,7 @@
           </el-tooltip>
           <el-divider content-position="center">使用新的合服算法</el-divider>
           <el-switch v-model="newTool" active-color="#13ce66"></el-switch>
-          <!-- <el-divider content-position="center">还原合服计划（需要选择对应的服务器）</el-divider>
+          <el-divider content-position="center">还原合服计划（需要选择对应的服务器）</el-divider>
           <div v-if="!inputData">
             <input ref="json-upload-input" class="json-upload-input" type="file" accept=".json" @change="handleClick">
             <div class="drop" @drop="handleDrop" @dragover="handleDragover" @dragenter="handleDragover">
@@ -63,7 +63,7 @@
                 选择文件
               </el-button>
             </div>
-          </div> -->
+          </div>
           <div v-if="inputData">
             <el-input
               type="textarea"
@@ -155,7 +155,8 @@ export default {
 
         zoneRange = zoneRange || [[1, 10 ** 6]]
         countries = changeServerData(countries)
-        this.$store.dispatch('initStore', { zoneRange, startZone, countries })
+        
+        this.$store.dispatch('initStore', { zoneRange, startZone, countries, lastPlan: JSON.parse(this.inputData || 'null') })
 
         this.$router.push({ path: `merge/${this.newTool}` })
       }).catch(console.error)
@@ -221,12 +222,6 @@ export default {
       return /\.(json|js)$/.test(file.name)
     },
     restore () {
-      const planObj = JSON.parse(this.inputData)
-      const obj = {}
-      R.forEachObjIndexed((v, k) => {
-        obj[v.to_zone] = obj[v.to_zone] || []
-        obj[v.to_zone].push(k)
-      })(planObj)
       function getCompareNum (str) {
         const reg = /(h(\d+)_)?(\d+)/
         const result = str.match(reg)
@@ -236,18 +231,27 @@ export default {
           return parseInt(result[3])
         }
       }
-      const zones = Object.keys(planObj).sort((a, b) => getCompareNum(a) - getCompareNum(b))
-      let lastPlans = []
-      R.forEachObjIndexed((v, k) => {
-        const plan = R.compose(R.flatten, R.map(item => planObj[item].country))(v)
-        lastPlans.push([
-          [[0, plan]],
-          zones.indexOf(v[0]),
-          v.length
-        ])
-      })(obj)
-      this.$store.dispatch('mergeOld/setLastPlanObj', Object.freeze(planObj))
-      this.$store.dispatch('mergeOld/setLastPlans', lastPlans)
+      const lastPlan = JSON.parse(this.inputData)
+      const zones = Object.keys(lastPlan).sort((a, b) => getCompareNum(a) - getCompareNum(b))
+      this.newTool = Array.isArray(lastPlan[zones[0]])
+      // console.log(lastPlan, zones)
+      // return
+      // const obj = {}
+      // R.forEachObjIndexed((v, k) => {
+      //   obj[v.to_zone] = obj[v.to_zone] || []
+      //   obj[v.to_zone].push(k)
+      // })(lastPlan)
+      // let lastPlans = []
+      // R.forEachObjIndexed((v, k) => {
+      //   const plan = R.compose(R.flatten, R.map(item => lastPlan[item].country))(v)
+      //   lastPlans.push([
+      //     [[0, plan]],
+      //     zones.indexOf(v[0]),
+      //     v.length
+      //   ])
+      // })(obj)
+      // this.$store.dispatch('mergeOld/setLastPlanObj', Object.freeze(lastPlan))
+      // this.$store.dispatch('mergeOld/setLastPlans', lastPlans)
       this.getCountryData(zones)
     }
   }

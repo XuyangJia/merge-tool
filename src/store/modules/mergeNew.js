@@ -13,10 +13,28 @@ const getters = {
 }
 
 const mutations = {
-  setCountries (state, [countries, mergeTimes]) {
+  setCountries (state, [countries, mergeTimes, lastPlan]) {
     state.countries = countries
     state.mergeTimes = mergeTimes
-    state.plans = calculatePlans(countries)
+    if (lastPlan) {
+      const zones = Object.keys(lastPlan)
+      const planObj = {}
+      zones.forEach(zone => {
+        lastPlan[zone].forEach(({to_zone, to_country}, country) => {
+          if (!planObj[to_zone]) planObj[to_zone] = []
+          if (!planObj[to_zone][to_country]) planObj[to_zone][to_country] = []
+          planObj[to_zone][to_country].push(countries.findIndex(item => {
+            return item.zone === zone && item.country === country
+          }))
+        })
+      })
+      const reg = /h\d_(\d+)/
+      state.plans = Object.keys(planObj).sort((a, b) => {
+        return parseFloat(a.match(reg)[1]) - parseFloat(b.match(reg)[1])
+      }).map(key => planObj[key])
+    } else {
+      state.plans = calculatePlans(countries)
+    }
   },
   moveTo (state, [fromZone, toZone, [zone, cid]]) {
     const index = state.countries.findIndex(item => item.zone === zone && item.country === cid)
@@ -39,7 +57,7 @@ const mutations = {
 
 const actions = {
   merge ({ commit, rootState }) {
-    commit('setCountries', [rootState.countries, rootState.mergeTimes])
+    commit('setCountries', [rootState.countries, rootState.mergeTimes, rootState.lastPlan])
   },
   moveTo ({ commit }, data) {
     commit('moveTo', data)
